@@ -1,5 +1,6 @@
 package com.example.phase_03.dto.request;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 public record ManagerRequestDTO(
@@ -11,9 +12,10 @@ public record ManagerRequestDTO(
                                 String lastName,
                                 @Pattern(regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$", message = "Invalid email address format")
                                 String email,
+                                @NotNull(message = "Username can not be null")
                                 @Pattern(regexp = "^[^\\s]+$", message = "Username can not be empty")
                                 String username,
-                                @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d]{8}$", message = "Password must be exactly " +
+                                @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$", message = "Password must be exactly " +
                                         "8 characters containing digits and letters")
                                 String password) {
 }
