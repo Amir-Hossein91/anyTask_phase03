@@ -3,8 +3,9 @@ package com.example.phase_03.dto.request;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
-public record TechnicianRequestDTO(@Pattern(regexp = "^[^\\d]{3,}$", message = "first name should be at least three characters and " +
-        "no digits are allowed")
+public record TechnicianRequestDTO(
+                                   @Pattern(regexp = "^[^\\d]{3,}$", message = "first name should be at least three characters and " +
+                                                "no digits are allowed")
                                    String firstName,
                                    @Pattern(regexp = "^[^\\d]{3,}$", message = "last name should be at least three characters and " +
                                            "no digits are allowed")
@@ -18,5 +19,5 @@ public record TechnicianRequestDTO(@Pattern(regexp = "^[^\\d]{3,}$", message = "
                                            "8 characters containing digits and letters")
                                    String password,
 
-                                   String imagePath) {
+                                   byte[] image) {
 }

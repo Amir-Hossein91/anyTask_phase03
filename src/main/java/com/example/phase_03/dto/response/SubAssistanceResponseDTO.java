@@ -5,7 +5,6 @@ import java.util.List;
 public record SubAssistanceResponseDTO(long id,
                                        String title,
                                        long basePrice,
-                                       List<Long> techniciansIds,
                                        String assistanceTitle,
                                        String about) {
 }
