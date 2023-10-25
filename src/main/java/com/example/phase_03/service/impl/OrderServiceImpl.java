@@ -65,6 +65,12 @@ public class OrderServiceImpl extends BaseServiceImpl<Order> implements OrderSer
                 if(subAssistance == null)
                     throw new NotFoundException(Constants.NO_SUCH_SUBASSISTANCE);
 
+                if(orderDescription.getCustomerSuggestedPrice()<subAssistance.getBasePrice())
+                    throw new IllegalArgumentException(Constants.INVALID_SUGGESTED_PRICE);
+
+                if(orderDescription.getCustomerDesiredDateAndTime().isBefore(LocalDateTime.now()))
+                    throw new IllegalArgumentException(Constants.DATE_BEFORE_NOW);
+
                 Order order = Order.builder().subAssistance(subAssistance).customer(customer)
                         .orderRegistrationDateAndTime(LocalDateTime.now()).orderDescription(orderDescription)
                         .orderStatus(OrderStatus.WAITING_FOR_TECHNICIANS_SUGGESTIONS)
@@ -179,12 +185,18 @@ public class OrderServiceImpl extends BaseServiceImpl<Order> implements OrderSer
             }
             if(!isFound)
                 throw new NotFoundException(Constants.ORDER_IS_NOT_RELATED);
-
             if(technicianSuggestion != null){
+
+                if(technicianSuggestion.getTechSuggestedPrice()<order.getSubAssistance().getBasePrice())
+                    throw new IllegalArgumentException(Constants.INVALID_SUGGESTED_PRICE);
+
+                if(technicianSuggestion.getTechSuggestedDate().isBefore(order.getOrderDescription().getCustomerDesiredDateAndTime()))
+                    throw new IllegalArgumentException(Constants.DATE_BEFORE_CUSTOMER_DESIRED);
+
                 order.getTechnicianSuggestions().add(technicianSuggestion);
                 saveOrUpdate(order);
             }
-        } catch (NotFoundException e){
+        } catch (NotFoundException | IllegalArgumentException e){
             printer.printError(e.getMessage());
         }
     }
