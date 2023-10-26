@@ -16,7 +16,7 @@ public record CustomerRequestDTO (
                                 @NotNull(message = "Username can not be null")
                                 @Pattern(regexp = "^[^\\s]+$", message = "Username can not be empty")
                                 String username,
-                                @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$", message = "Password must be exactly " +
+                                @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$", message = "Password must be at least " +
                                         "8 characters containing digits and letters")
                                 String password,
                                 @Range(min = 0, message = "Credit can not be negative")
