@@ -6,6 +6,7 @@ import com.example.phase_03.entity.Technician;
 import com.example.phase_03.entity.enums.TechnicianStatus;
 import com.example.phase_03.mapper.TechnicianMapper;
 import com.example.phase_03.service.impl.TechnicianServiceImpl;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.Base64;
 
 @RestController
@@ -26,8 +28,9 @@ public class TechnicianController {
     TechnicianServiceImpl technicianService;
 
     @PostMapping(value = "/save")
-    public ResponseEntity<TechnicianResponseDTO> saveTechnician (@RequestBody TechnicianRequestDTO requestDTO) throws IOException {
+    public ResponseEntity<TechnicianResponseDTO> saveTechnician (@RequestBody @Valid TechnicianRequestDTO requestDTO) throws IOException {
         Technician technician = TechnicianMapper.INSTANCe.dtoToModel(requestDTO);
+        technician.setRegistrationDate(LocalDateTime.now());
 
         byte[] image = technician.getImage();
         Path path = Path.of("C:\\Users\\AmirHossein\\IdeaProjects\\anyTask\\image_output\\technician_01.jpg");
