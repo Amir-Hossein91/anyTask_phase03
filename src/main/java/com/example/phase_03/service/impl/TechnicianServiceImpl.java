@@ -198,12 +198,9 @@ public class TechnicianServiceImpl implements TechnicianService {
 
     public List<Technician> showAllTechnicians(String managerUsername) {
         Manager manager = managerService.findByUsername(managerUsername);
-        if (manager != null) {
-            return findAll();
-        } else {
-//            printer.printError("Only manager can see the list of all technicians");
-            return List.of();
-        }
+        if (manager == null)
+            throw new IllegalArgumentException("Only manager can see the list of all technicians");
+        return findAll();
     }
 
     public List<Technician> seeUnapprovedTechnicians(String managerUsername) {

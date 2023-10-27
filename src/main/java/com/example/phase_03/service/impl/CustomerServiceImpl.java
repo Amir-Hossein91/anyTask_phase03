@@ -37,22 +37,16 @@ public class CustomerServiceImpl implements CustomerService {
 
     public List<String> showAllCustomers(String managerUsername) {
         Manager manager = managerService.findByUsername(managerUsername);
-        if (manager != null) {
-            return findAll().stream().map(Object::toString).toList();
-        } else {
-//            printer.printError("Only manager can see the list of all customers");
-            return List.of();
-        }
+        if (manager == null)
+            throw new IllegalArgumentException("Only manager can see the list of all customers");
+        return findAll().stream().map(Object::toString).toList();
     }
 
     public List<String> seeOrdersOf(String customerUsername) {
         Customer customer = findByUsername(customerUsername);
-        if (customer != null) {
-            return orderService.findByCustomer(customer).stream().map(Object::toString).toList();
-        } else {
-//            printer.printError("this function is only available for 'customers'");
-            return List.of();
-        }
+        if (customer == null)
+            throw new IllegalArgumentException("this function is only available for 'customers'");
+        return orderService.findByCustomer(customer).stream().map(Object::toString).toList();
     }
 
     private boolean isSuggestionChoosingPossible(Person person, Order order) {
