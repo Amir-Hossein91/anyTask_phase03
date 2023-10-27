@@ -1,8 +1,12 @@
 package com.example.phase_03.dto.request;
 
+import com.example.phase_03.validator.Image;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import lombok.Builder;
 
+@Builder
 public record TechnicianRequestDTO(
                                    @Pattern(regexp = "^[^\\d]{3,}$", message = "first name should be at least three characters and " +
                                                 "no digits are allowed")
@@ -10,7 +14,7 @@ public record TechnicianRequestDTO(
                                    @Pattern(regexp = "^[^\\d]{3,}$", message = "last name should be at least three characters and " +
                                            "no digits are allowed")
                                    String lastName,
-                                   @Pattern(regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$", message = "Invalid email address format")
+                                   @Email
                                    String email,
                                    @NotNull(message = "Username can not be null")
                                    @Pattern(regexp = "^[^\\s]+$", message = "Username can not be empty")
@@ -18,6 +22,6 @@ public record TechnicianRequestDTO(
                                    @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$", message = "Password must be at least " +
                                            "8 characters containing digits and letters")
                                    String password,
-
+                                   @Image(message = "Image is not of type 'jpg' or it is more than 300KB")
                                    byte[] image) {
 }

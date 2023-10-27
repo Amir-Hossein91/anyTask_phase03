@@ -1,5 +1,6 @@
 package com.example.phase_03.dto.request;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
@@ -10,7 +11,7 @@ public record PersonRequestDTO(
                                @Pattern(regexp = "^[^\\d]{3,}$", message = "last name should be at least three characters and " +
                                        "no digits are allowed")
                                String lastName,
-                               @Pattern(regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$", message = "Invalid email address format")
+                               @Email
                                String email,
                                @NotNull(message = "Username can not be null")
                                @Pattern(regexp = "^[^\\s]+$", message = "Username can not be empty")
