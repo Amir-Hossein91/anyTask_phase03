@@ -1,5 +1,6 @@
 package com.example.phase_03.controller;
 
+import com.example.phase_03.controller.jsonClasses.AssignTechnician;
 import com.example.phase_03.dto.request.AssistanceRequestDTO;
 import com.example.phase_03.dto.request.ManagerRequestDTO;
 import com.example.phase_03.dto.request.SubAssistanceRequestDTO;
@@ -90,7 +91,28 @@ public class ManagerController {
     }
 
     @PostMapping("/assign")
-    public ResponseEntity<String> assignTechnicianToSubAssistance(String request){
+    public ResponseEntity<String> assignTechnicianToSubAssistance(@RequestBody AssignTechnician request){
 
+        String techUsername = request.getTechnicianUsername();
+        String subAssistanceTitle = request.getSubAssistanceTitle();
+        String assistanceTitle = request.getAssistanceTitle();
+        System.out.println(techUsername + subAssistanceTitle + assistanceTitle);
+
+        technicianService.addTechnicianToSubAssistance(techUsername,subAssistanceTitle,assistanceTitle);
+
+        return new ResponseEntity<>("Technician assigned successfully", HttpStatus.CREATED);
+    }
+
+    @PostMapping("/resign")
+    public ResponseEntity<String> removeTechnicianFromSubAssistance(@RequestBody AssignTechnician request){
+
+        String techUsername = request.getTechnicianUsername();
+        String subAssistanceTitle = request.getSubAssistanceTitle();
+        String assistanceTitle = request.getAssistanceTitle();
+        System.out.println(techUsername + subAssistanceTitle + assistanceTitle);
+
+        technicianService.removeTechnicianFromSubAssistance(techUsername,subAssistanceTitle,assistanceTitle);
+
+        return new ResponseEntity<>("Technician resigned successfully", HttpStatus.CREATED);
     }
 }

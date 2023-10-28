@@ -60,6 +60,11 @@ public class SubAssistanceServiceImpl implements SubAssistanceService {
         return repository.findByTitleAndAssistance(title, assistance).orElse(null);
     }
 
+    @Override
+    public List<SubAssistance> findByTechniciansContaining(Technician technician) {
+        return repository.findByTechniciansContaining(technician).orElse(List.of());
+    }
+
     @Transactional
     public SubAssistance addSubAssistance( SubAssistance subAssistance ,String assistanceTitle) {
         Assistance assistance = assistanceService.findAssistance(assistanceTitle);

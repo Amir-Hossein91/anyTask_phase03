@@ -62,13 +62,10 @@ public class TechnicianServiceImpl implements TechnicianService {
     }
 
     @Transactional
-    public void addTechnicianToSubAssistance(String managerName, String technicianName,
+    public void addTechnicianToSubAssistance(String technicianUsername,
                                              String subAssistanceTitle, String assistanceTitle) {
 
-        Manager manager = managerService.findByUsername(managerName);
-        if (manager == null)
-            throw new IllegalArgumentException("Only manager can add technicians to a sub-assistance");
-        Technician technician = findByUsername(technicianName);
+        Technician technician = findByUsername(technicianUsername);
         Assistance assistance = assistanceService.findAssistance(assistanceTitle);
 
         if (assistance == null)
@@ -93,12 +90,8 @@ public class TechnicianServiceImpl implements TechnicianService {
     }
 
     @Transactional
-    public void removeTechnicianFromSubAssistance(String managerName, String technicianName,
+    public void removeTechnicianFromSubAssistance(String technicianName,
                                                   String subAssistanceTitle, String assistanceTitle) {
-
-        Manager manager = managerService.findByUsername(managerName);
-        if (manager == null)
-            throw new IllegalArgumentException("Only manager can remove technicians from a sub-assistance");
 
         Technician technician = findByUsername(technicianName);
         Assistance assistance = assistanceService.findAssistance(assistanceTitle);
@@ -116,6 +109,11 @@ public class TechnicianServiceImpl implements TechnicianService {
             throw new NotFoundException(Constants.TECHNICIAN_NOT_IN_LIST);
 
         technicians.remove(technician);
+
+        if(subAssistanceService.findByTechniciansContaining(technician).isEmpty()) {
+            technician.setTechnicianStatus(TechnicianStatus.PENDING);
+            technician.setActive(false);
+        }
         subAssistanceService.saveOrUpdate(subAssistance);
     }
 
@@ -160,24 +158,13 @@ public class TechnicianServiceImpl implements TechnicianService {
         return findAll();
     }
 
-    public List<Technician> seeUnapprovedTechnicians(String managerUsername) {
-
-        Manager manager = managerService.findByUsername(managerUsername);
-        if (manager == null)
-            throw new IllegalArgumentException("Only manager can see unapproved technicians");
+    @Transactional
+    public List<Technician> seeUnapprovedTechnicians() {
 
         List<Technician> technicians = repository.findUnapproved().orElse(null);
         if (technicians == null || technicians.isEmpty())
             throw new NotFoundException(Constants.NO_UNAPPROVED_TECHNICIANS);
-        boolean isListChanged = false;
-        for (Technician t : technicians) {
-            if (t.getTechnicianStatus() == TechnicianStatus.NEW) {
-                t.setTechnicianStatus(TechnicianStatus.PENDING);
-                isListChanged = true;
-            }
-        }
-        if (isListChanged)
-            saveOrUpdate(technicians);
+
         return technicians;
     }
 

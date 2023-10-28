@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 public interface TechnicianMapper {
 
-    TechnicianMapper INSTANCe = Mappers.getMapper(TechnicianMapper.class);
+    TechnicianMapper INSTANCE = Mappers.getMapper(TechnicianMapper.class);
 
     Technician dtoToModel(TechnicianRequestDTO requestDTO);
 
