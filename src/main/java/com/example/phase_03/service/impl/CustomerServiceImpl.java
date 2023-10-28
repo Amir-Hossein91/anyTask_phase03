@@ -8,12 +8,10 @@ import com.example.phase_03.exceptions.NotFoundException;
 import com.example.phase_03.repository.CustomerRepository;
 import com.example.phase_03.service.CustomerService;
 import com.example.phase_03.utility.Constants;
-import jakarta.persistence.PersistenceException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -50,66 +48,57 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private boolean isSuggestionChoosingPossible(Person person, Order order) {
-        try {
-            if (order == null)
-                throw new NotFoundException(Constants.NO_SUCH_ORDER);
+        if (order == null)
+            throw new NotFoundException(Constants.NO_SUCH_ORDER);
 
-            if (!order.getCustomer().equals(person))
-                throw new NotFoundException(Constants.ORDER_NOT_BELONG_TO_CUSTOMER);
+        if (!order.getCustomer().equals(person))
+            throw new NotFoundException(Constants.ORDER_NOT_BELONG_TO_CUSTOMER);
 
-            if (!(order.getOrderStatus() == OrderStatus.WAITING_FOR_TECHNICIANS_SUGGESTIONS
-                    || order.getOrderStatus() == OrderStatus.CHOOSING_TECHNICIAN))
-                throw new NotFoundException(Constants.SUGGESTION_NOT_AVAILABLE_IN_THIS_STATUS);
-
-        } catch (NotFoundException e) {
-//            printer.printError(e.getMessage());
-            return false;
-        }
+        if (!(order.getOrderStatus() == OrderStatus.WAITING_FOR_TECHNICIANS_SUGGESTIONS
+                || order.getOrderStatus() == OrderStatus.CHOOSING_TECHNICIAN))
+            throw new NotFoundException(Constants.SUGGESTION_NOT_AVAILABLE_IN_THIS_STATUS);
         return true;
     }
 
     public List<TechnicianSuggestionDTO> seeTechnicianSuggestionsOrderedByPrice(String customerUsername, long orderId) {
         Customer customer = findByUsername(customerUsername);
-        if (customer != null) {
-            Order order = orderService.findById(orderId);
-            if (!isSuggestionChoosingPossible(customer, order))
-                return List.of();
+        if (customer == null)
+            throw new IllegalArgumentException("Only customers have access to this function");
 
-            List<TechnicianSuggestionDTO> technicianSuggestions = technicianSuggestionService.getSuggestionsOrderedByPrice(order);
-            if (technicianSuggestions == null)
-                return List.of();
+        Order order = orderService.findById(orderId);
+        if (!isSuggestionChoosingPossible(customer, order))
+            throw new IllegalStateException("Can not see the technician suggestions");
 
-            if (order.getOrderStatus() == OrderStatus.WAITING_FOR_TECHNICIANS_SUGGESTIONS) {
-                order.setOrderStatus(OrderStatus.CHOOSING_TECHNICIAN);
-                orderService.saveOrUpdate(order);
-            }
-            return technicianSuggestions;
-        } else {
-//            printer.printError("Only customers have access to this function");
-            return List.of();
+        List<TechnicianSuggestionDTO> technicianSuggestions = technicianSuggestionService.getSuggestionsOrderedByPrice(order);
+        if (technicianSuggestions == null)
+            throw new NotFoundException("No technician suggestion available for this order");
+
+        if (order.getOrderStatus() == OrderStatus.WAITING_FOR_TECHNICIANS_SUGGESTIONS) {
+            order.setOrderStatus(OrderStatus.CHOOSING_TECHNICIAN);
+            orderService.saveOrUpdate(order);
         }
+        return technicianSuggestions;
+
     }
 
     public List<TechnicianSuggestionDTO> seeTechnicianSuggestionsOrderedByScore(String customerUsername, long orderId) {
         Customer customer = findByUsername(customerUsername);
-        if (customer != null) {
-            Order order = orderService.findById(orderId);
-            if (!isSuggestionChoosingPossible(customer, order))
-                return List.of();
+        if (customer == null)
+            throw new IllegalArgumentException("Only customers have access to this function");
 
-            List<TechnicianSuggestionDTO> technicianSuggestions = technicianSuggestionService.getSuggestionsOrderedByScore(order);
-            if (technicianSuggestions == null)
-                return List.of();
+        Order order = orderService.findById(orderId);
+        if (!isSuggestionChoosingPossible(customer, order))
+            throw new IllegalStateException("Can not see the technician suggestions");
 
-            if (order.getOrderStatus() == OrderStatus.WAITING_FOR_TECHNICIANS_SUGGESTIONS) {
-                order.setOrderStatus(OrderStatus.CHOOSING_TECHNICIAN);
-                orderService.saveOrUpdate(order);
-            }
-            return technicianSuggestions;
-        } else {
-//            printer.printError("Only customers have access to this function");
-            return List.of();
+        List<TechnicianSuggestionDTO> technicianSuggestions = technicianSuggestionService.getSuggestionsOrderedByScore(order);
+        if (technicianSuggestions == null)
+            throw new NotFoundException("No technician suggestion available for this order");
+
+        if (order.getOrderStatus() == OrderStatus.WAITING_FOR_TECHNICIANS_SUGGESTIONS) {
+            order.setOrderStatus(OrderStatus.CHOOSING_TECHNICIAN);
+            orderService.saveOrUpdate(order);
         }
+        return technicianSuggestions;
     }
 
     @Transactional
@@ -120,31 +109,28 @@ public class CustomerServiceImpl implements CustomerService {
 
         Order order = orderService.findById(orderId);
         if (!isSuggestionChoosingPossible(customer, order))
-            return;
+            throw new IllegalStateException("Can not choose a technician suggestion in this state");
 
         List<TechnicianSuggestionDTO> technicianSuggestions = technicianSuggestionService.getSuggestionsOrderedByPrice(order);
-        try {
-            if (technicianSuggestions == null)
-                throw new NotFoundException(Constants.NO_TECHNICIAN_SUGGESTION_FOUND);
 
-            List<Long> suggestionsIds = technicianSuggestions.stream()
-                    .map(TechnicianSuggestionDTO::getSuggestionId)
-                    .toList();
+        if (technicianSuggestions == null)
+            throw new NotFoundException(Constants.NO_TECHNICIAN_SUGGESTION_FOUND);
 
-            TechnicianSuggestion suggestion = technicianSuggestionService.findById(suggestionId);
-            if (suggestion == null)
-                throw new NotFoundException(Constants.TECHNICIAN_SUGGESTION_NOT_EXIST);
+        List<Long> suggestionsIds = technicianSuggestions.stream()
+                .map(TechnicianSuggestionDTO::getSuggestionId)
+                .toList();
 
-            if (!suggestionsIds.contains(suggestion.getId()))
-                throw new NotFoundException(Constants.TECHNICIAN_SUGGESTION_NOT_IN_LIST);
+        TechnicianSuggestion suggestion = technicianSuggestionService.findById(suggestionId);
 
-            order.setTechnician(suggestion.getTechnician());
-            order.setOrderStatus(OrderStatus.TECHNICIAN_IS_ON_THE_WAY);
-            orderService.saveOrUpdate(order);
+        if (suggestion == null)
+            throw new NotFoundException(Constants.TECHNICIAN_SUGGESTION_NOT_EXIST);
 
-        } catch (NotFoundException e) {
-//            printer.printError(e.getMessage());
-        }
+        if (!suggestionsIds.contains(suggestion.getId()))
+            throw new NotFoundException(Constants.TECHNICIAN_SUGGESTION_NOT_IN_LIST);
+
+        order.setTechnician(suggestion.getTechnician());
+        order.setOrderStatus(OrderStatus.TECHNICIAN_IS_ON_THE_WAY);
+        orderService.saveOrUpdate(order);
     }
 
     @Transactional
@@ -153,41 +139,36 @@ public class CustomerServiceImpl implements CustomerService {
         if (customer == null)
             throw new IllegalArgumentException("Only customers have access to this function");
         Order order = orderService.findById(orderId);
-        try {
-            if (order == null)
-                throw new NotFoundException(Constants.NO_SUCH_ORDER);
+        if (order == null)
+            throw new NotFoundException(Constants.NO_SUCH_ORDER);
 
-            if (!order.getCustomer().equals(customer))
-                throw new NotFoundException(Constants.ORDER_NOT_BELONG_TO_CUSTOMER);
+        if (!order.getCustomer().equals(customer))
+            throw new NotFoundException(Constants.ORDER_NOT_BELONG_TO_CUSTOMER);
 
-            if (order.getOrderStatus() != OrderStatus.TECHNICIAN_IS_ON_THE_WAY)
-                throw new IllegalStateException(Constants.NO_TECHNICIAN_SELECTED);
+        if (order.getOrderStatus() != OrderStatus.TECHNICIAN_IS_ON_THE_WAY)
+            throw new IllegalStateException(Constants.NO_TECHNICIAN_SELECTED);
 
-            List<TechnicianSuggestionDTO> technicianSuggestions = technicianSuggestionService.getSuggestionsOrderedByPrice(order);
+        List<TechnicianSuggestionDTO> technicianSuggestions = technicianSuggestionService.getSuggestionsOrderedByPrice(order);
 
-            List<Long> suggestionsIds = technicianSuggestions.stream()
-                    .map(TechnicianSuggestionDTO::getSuggestionId)
-                    .toList();
+        List<Long> suggestionsIds = technicianSuggestions.stream()
+                .map(TechnicianSuggestionDTO::getSuggestionId)
+                .toList();
 
-            TechnicianSuggestion suggestion = technicianSuggestionService.findById(suggestionId);
-            if (suggestion == null)
-                throw new NotFoundException(Constants.TECHNICIAN_SUGGESTION_NOT_EXIST);
+        TechnicianSuggestion suggestion = technicianSuggestionService.findById(suggestionId);
+        if (suggestion == null)
+            throw new NotFoundException(Constants.TECHNICIAN_SUGGESTION_NOT_EXIST);
 
-            if (!suggestionsIds.contains(suggestion.getId()))
-                throw new NotFoundException(Constants.TECHNICIAN_SUGGESTION_NOT_IN_LIST);
+        if (!suggestionsIds.contains(suggestion.getId()))
+            throw new NotFoundException(Constants.TECHNICIAN_SUGGESTION_NOT_IN_LIST);
 
-            if (!suggestion.getTechnician().equals(order.getTechnician()))
-                throw new NotFoundException(Constants.SUGGESTION_IS_NOT_THE_CHOSEN_ONE);
+        if (!suggestion.getTechnician().equals(order.getTechnician()))
+            throw new NotFoundException(Constants.SUGGESTION_IS_NOT_THE_CHOSEN_ONE);
 
-            if (LocalDateTime.now().isBefore(suggestion.getTechSuggestedDate()))
-                throw new IllegalStateException(Constants.ORDER_CANT_START_BEFORE_SUGGESTED_TIME);
+        if (LocalDateTime.now().isBefore(suggestion.getTechSuggestedDate()))
+            throw new IllegalStateException(Constants.ORDER_CANT_START_BEFORE_SUGGESTED_TIME);
 
-            order.setOrderStatus(OrderStatus.STARTED);
-            orderService.saveOrUpdate(order);
-
-        } catch (NotFoundException | IllegalStateException e) {
-//            printer.printError(e.getMessage());
-        }
+        order.setOrderStatus(OrderStatus.STARTED);
+        orderService.saveOrUpdate(order);
     }
 
     @Transactional
@@ -196,38 +177,33 @@ public class CustomerServiceImpl implements CustomerService {
         if (customer == null)
             throw new IllegalArgumentException("Only customers have access to this function");
         Order order = orderService.findById(orderId);
-        try {
-            if (order == null)
-                throw new NotFoundException(Constants.NO_SUCH_ORDER);
+        if (order == null)
+            throw new NotFoundException(Constants.NO_SUCH_ORDER);
 
-            if (!order.getCustomer().equals(customer))
-                throw new NotFoundException(Constants.ORDER_NOT_BELONG_TO_CUSTOMER);
+        if (!order.getCustomer().equals(customer))
+            throw new NotFoundException(Constants.ORDER_NOT_BELONG_TO_CUSTOMER);
 
-            if (order.getOrderStatus() != OrderStatus.STARTED)
-                throw new IllegalStateException(Constants.ORDER_NOT_STARTED);
+        if (order.getOrderStatus() != OrderStatus.STARTED)
+            throw new IllegalStateException(Constants.ORDER_NOT_STARTED);
 
-            List<TechnicianSuggestionDTO> technicianSuggestions = technicianSuggestionService.getSuggestionsOrderedByPrice(order);
+        List<TechnicianSuggestionDTO> technicianSuggestions = technicianSuggestionService.getSuggestionsOrderedByPrice(order);
 
-            List<Long> suggestionsIds = technicianSuggestions.stream()
-                    .map(TechnicianSuggestionDTO::getSuggestionId)
-                    .toList();
+        List<Long> suggestionsIds = technicianSuggestions.stream()
+                .map(TechnicianSuggestionDTO::getSuggestionId)
+                .toList();
 
-            TechnicianSuggestion suggestion = technicianSuggestionService.findById(suggestionId);
-            if (suggestion == null)
-                throw new NotFoundException(Constants.TECHNICIAN_SUGGESTION_NOT_EXIST);
+        TechnicianSuggestion suggestion = technicianSuggestionService.findById(suggestionId);
+        if (suggestion == null)
+            throw new NotFoundException(Constants.TECHNICIAN_SUGGESTION_NOT_EXIST);
 
-            if (!suggestionsIds.contains(suggestion.getId()))
-                throw new NotFoundException(Constants.TECHNICIAN_SUGGESTION_NOT_IN_LIST);
+        if (!suggestionsIds.contains(suggestion.getId()))
+            throw new NotFoundException(Constants.TECHNICIAN_SUGGESTION_NOT_IN_LIST);
 
-            if (!suggestion.getTechnician().equals(order.getTechnician()))
-                throw new NotFoundException(Constants.SUGGESTION_IS_NOT_THE_CHOSEN_ONE);
+        if (!suggestion.getTechnician().equals(order.getTechnician()))
+            throw new NotFoundException(Constants.SUGGESTION_IS_NOT_THE_CHOSEN_ONE);
 
-            order.setOrderStatus(OrderStatus.FINISHED);
-            orderService.saveOrUpdate(order);
-
-        } catch (NotFoundException | IllegalStateException e) {
-//            printer.printError(e.getMessage());
-        }
+        order.setOrderStatus(OrderStatus.FINISHED);
+        orderService.saveOrUpdate(order);
     }
 
     @Transactional
@@ -235,39 +211,34 @@ public class CustomerServiceImpl implements CustomerService {
         Customer customer = findByUsername(customerUsername);
         if (customer == null)
             throw new IllegalArgumentException("Paying the price is an act of 'customer'");
-        try {
-            Order order = orderService.findById(orderId);
-            if (order == null)
-                throw new NotFoundException(Constants.NO_SUCH_ORDER);
+        Order order = orderService.findById(orderId);
+        if (order == null)
+            throw new NotFoundException(Constants.NO_SUCH_ORDER);
 
-            if (!order.getCustomer().equals(customer))
-                throw new NotFoundException(Constants.ORDER_NOT_BELONG_TO_CUSTOMER);
+        if (!order.getCustomer().equals(customer))
+            throw new NotFoundException(Constants.ORDER_NOT_BELONG_TO_CUSTOMER);
 
-            if (order.getOrderStatus() != OrderStatus.FINISHED)
-                throw new IllegalStateException(Constants.PAYING_NOT_POSSIBLE_IN_THIS_STATE);
+        if (order.getOrderStatus() != OrderStatus.FINISHED)
+            throw new IllegalStateException(Constants.PAYING_NOT_POSSIBLE_IN_THIS_STATE);
 
-            TechnicianSuggestion selecteSuggestion = new TechnicianSuggestion();
-            Technician selectedTechnician = order.getTechnician();
-            for (TechnicianSuggestion t : order.getTechnicianSuggestions()) {
-                Technician test = t.getTechnician();
-                if (test == selectedTechnician) {
-                    selecteSuggestion = t;
-                    break;
-                }
+        TechnicianSuggestion selectSuggestion = new TechnicianSuggestion();
+        Technician selectedTechnician = order.getTechnician();
+        for (TechnicianSuggestion t : order.getTechnicianSuggestions()) {
+            Technician test = t.getTechnician();
+            if (test == selectedTechnician) {
+                selectSuggestion = t;
+                break;
             }
-            customer.setCredit(customer.getCredit() - selecteSuggestion.getTechSuggestedPrice());
-            if (customer.getCredit() < 0)
-                throw new NotEnoughCreditException(Constants.NOT_ENOUGH_CREDIT);
-
-            selectedTechnician.setCredit(selectedTechnician.getCredit() + selecteSuggestion.getTechSuggestedPrice());
-            selectedTechnician.setNumberOfFinishedTasks(selectedTechnician.getNumberOfFinishedTasks() + 1);
-            order.setOrderStatus(OrderStatus.FULLY_PAID);
-            saveOrUpdate(customer);
-            orderService.saveOrUpdate(order);
-
-        } catch (IllegalStateException | NotFoundException | NotEnoughCreditException e) {
-//            printer.printError(e.getMessage());
         }
+        customer.setCredit(customer.getCredit() - selectSuggestion.getTechSuggestedPrice());
+        if (customer.getCredit() < 0)
+            throw new NotEnoughCreditException(Constants.NOT_ENOUGH_CREDIT);
+
+        selectedTechnician.setCredit(selectedTechnician.getCredit() + selectSuggestion.getTechSuggestedPrice());
+        selectedTechnician.setNumberOfFinishedTasks(selectedTechnician.getNumberOfFinishedTasks() + 1);
+        order.setOrderStatus(OrderStatus.FULLY_PAID);
+        saveOrUpdate(customer);
+        orderService.saveOrUpdate(order);
     }
 
     @Transactional
@@ -275,73 +246,44 @@ public class CustomerServiceImpl implements CustomerService {
         Customer customer = findByUsername(customerUsername);
         if (customer == null)
             throw new IllegalArgumentException("Scoring the 'technician' is an act of 'customer'");
-        try {
-            Order order = orderService.findById(orderId);
-            if (order == null)
-                throw new NotFoundException(Constants.NO_SUCH_ORDER);
+        Order order = orderService.findById(orderId);
+        if (order == null)
+            throw new NotFoundException(Constants.NO_SUCH_ORDER);
 
-            if (!order.getCustomer().equals(customer))
-                throw new NotFoundException(Constants.ORDER_NOT_BELONG_TO_CUSTOMER);
+        if (!order.getCustomer().equals(customer))
+            throw new NotFoundException(Constants.ORDER_NOT_BELONG_TO_CUSTOMER);
 
-            if (order.getOrderStatus() != OrderStatus.FINISHED)
-                throw new IllegalStateException(Constants.SCORING_NOT_POSSIBLE_IN_THIS_STATE);
+        if (order.getOrderStatus() != OrderStatus.FINISHED)
+            throw new IllegalStateException(Constants.SCORING_NOT_POSSIBLE_IN_THIS_STATE);
 
-            Technician selectedTechnician = order.getTechnician();
+        Technician selectedTechnician = order.getTechnician();
 
-            selectedTechnician.setScore(selectedTechnician.getScore() + score);
-            order.setTechnicianScore(score);
-            order.setTechEvaluation(opinion);
-            orderService.saveOrUpdate(order);
-        } catch (IllegalStateException | NotFoundException e) {
-//            printer.printError(e.getMessage());
-        }
+        selectedTechnician.setScore(selectedTechnician.getScore() + score);
+        order.setTechnicianScore(score);
+        order.setTechEvaluation(opinion);
+        orderService.saveOrUpdate(order);
     }
 
     @Override
     @Transactional
     public Customer saveOrUpdate(Customer t) {
-        try {
-            return repository.save(t);
-        } catch (RuntimeException e) {
-//            printer.printError(e.getMessage());
-//            printer.printError(Arrays.toString(e.getStackTrace()));
-//            input.nextLine();
-            return null;
-        }
+        return repository.save(t);
     }
 
     @Override
     @Transactional
     public void delete(Customer t) {
-        try {
-            repository.delete(t);
-        } catch (RuntimeException e) {
-//            if (e instanceof PersistenceException)
-//                printer.printError("Could not delete " + repository.getClass().getSimpleName());
-//            else
-//                printer.printError("Could not complete deletion. Specified " + repository.getClass().getSimpleName() + " not found!");
-//            printer.printError(Arrays.toString(e.getStackTrace()));
-        }
+        repository.delete(t);
     }
 
     @Override
     public Customer findById(long id) {
-        try {
-            return repository.findById(id).orElseThrow(() -> new NotFoundException("\nCould not find customer with id = " + id));
-        } catch (RuntimeException | NotFoundException e) {
-//            printer.printError(e.getMessage());
-            return null;
-        }
+        return repository.findById(id).orElseThrow(() -> new NotFoundException("\nCould not find customer with id = " + id));
     }
 
     @Override
     public List<Customer> findAll() {
-        try {
-            return repository.findAll();
-        } catch (RuntimeException e) {
-//            printer.printError(e.getMessage());
-            return null;
-        }
+        return repository.findAll();
     }
 
     @Override

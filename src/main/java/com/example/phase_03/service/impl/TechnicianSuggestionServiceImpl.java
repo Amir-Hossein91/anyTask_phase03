@@ -8,13 +8,11 @@ import com.example.phase_03.exceptions.NotFoundException;
 import com.example.phase_03.repository.TechnicianSuggestionRepository;
 import com.example.phase_03.service.TechnicianSuggestionService;
 import com.example.phase_03.utility.Constants;
-import jakarta.persistence.PersistenceException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -41,103 +39,68 @@ public class TechnicianSuggestionServiceImpl implements TechnicianSuggestionServ
     @Override
     @Transactional
     public TechnicianSuggestion saveOrUpdate(TechnicianSuggestion t) {
-        try {
-            return repository.save(t);
-        } catch (RuntimeException e) {
-//            printer.printError(e.getMessage());
-//            printer.printError(Arrays.toString(e.getStackTrace()));
-//            input.nextLine();
-            return null;
-        }
+        return repository.save(t);
     }
 
     @Override
     @Transactional
     public void delete(TechnicianSuggestion t) {
-        try {
-            repository.delete(t);
-        } catch (RuntimeException e) {
-//            if (e instanceof PersistenceException)
-//                printer.printError("Could not delete " + repository.getClass().getSimpleName());
-//            else
-//                printer.printError("Could not complete deletion. Specified " + repository.getClass().getSimpleName() + " not found!");
-//            printer.printError(Arrays.toString(e.getStackTrace()));
-        }
+        repository.delete(t);
     }
 
     @Override
     public TechnicianSuggestion findById(long id) {
-        try {
-            return repository.findById(id).orElseThrow(() -> new NotFoundException("\nCould not find technician suggestion with id = " + id));
-        } catch (RuntimeException | NotFoundException e) {
-//            printer.printError(e.getMessage());
-            return null;
-        }
+        return repository.findById(id).orElseThrow(() -> new NotFoundException("\nCould not find technician suggestion with id = " + id));
     }
 
     @Override
     public List<TechnicianSuggestion> findAll() {
-        try {
-            return repository.findAll();
-        } catch (RuntimeException e) {
-//            printer.printError(e.getMessage());
-            return null;
-        }
+        return repository.findAll();
     }
 
     @Override
     public List<TechnicianSuggestionDTO> getSuggestionsOrderedByPrice(Order order) {
-        try {
-            List<TechnicianSuggestion> suggestions = repository.findByOrderOrderByTechSuggestedPriceAsc(order).orElseThrow(
-                    () -> new NotFoundException(Constants.NO_TECHNICIAN_SUGGESTION_FOUND)
-            );
-            List<TechnicianSuggestionDTO> result = new ArrayList<>();
-            for (TechnicianSuggestion t : suggestions) {
-                TechnicianSuggestionDTO suggestionDTO = TechnicianSuggestionDTO.builder()
-                        .suggestionId(t.getId())
-                        .suggestionRegistrationDate(LocalDateTime.now())
-                        .technicianFirstname(t.getTechnician().getFirstName())
-                        .technicianLastname(t.getTechnician().getLastName())
-                        .technicianId(t.getTechnician().getId())
-                        .technicianScore(t.getTechnician().getScore())
-                        .numberOfFinishedTasks(t.getTechnician().getNumberOfFinishedTasks())
-                        .suggestedPrice(t.getTechSuggestedPrice())
-                        .suggestedDate(t.getTechSuggestedDate())
-                        .taskEstimatedDuration(t.getTaskEstimatedDuration()).build();
-                result.add(suggestionDTO);
-            }
-            return result;
-        } catch (NotFoundException e) {
-//            printer.printError(e.getMessage());
-            return null;
+        List<TechnicianSuggestion> suggestions = repository.findByOrderOrderByTechSuggestedPriceAsc(order).orElseThrow(
+                () -> new NotFoundException(Constants.NO_TECHNICIAN_SUGGESTION_FOUND)
+        );
+        List<TechnicianSuggestionDTO> result = new ArrayList<>();
+        for (TechnicianSuggestion t : suggestions) {
+            TechnicianSuggestionDTO suggestionDTO = TechnicianSuggestionDTO.builder()
+                    .suggestionId(t.getId())
+                    .suggestionRegistrationDate(LocalDateTime.now())
+                    .technicianFirstname(t.getTechnician().getFirstName())
+                    .technicianLastname(t.getTechnician().getLastName())
+                    .technicianId(t.getTechnician().getId())
+                    .technicianScore(t.getTechnician().getScore())
+                    .numberOfFinishedTasks(t.getTechnician().getNumberOfFinishedTasks())
+                    .suggestedPrice(t.getTechSuggestedPrice())
+                    .suggestedDate(t.getTechSuggestedDate())
+                    .taskEstimatedDuration(t.getTaskEstimatedDuration()).build();
+            result.add(suggestionDTO);
         }
+        return result;
     }
 
     @Override
     public List<TechnicianSuggestionDTO> getSuggestionsOrderedByScore(Order order) {
-        try {
-            List<TechnicianSuggestion> suggestions = repository.findByOrderOrderByTechnicianScore(order).orElseThrow(
-                    () -> new NotFoundException(Constants.NO_TECHNICIAN_SUGGESTION_FOUND)
-            );
-            List<TechnicianSuggestionDTO> result = new ArrayList<>();
-            for (TechnicianSuggestion t : suggestions) {
-                TechnicianSuggestionDTO suggestionDTO = TechnicianSuggestionDTO.builder()
-                        .suggestionId(t.getId())
-                        .suggestionRegistrationDate(LocalDateTime.now())
-                        .technicianFirstname(t.getTechnician().getFirstName())
-                        .technicianLastname(t.getTechnician().getLastName())
-                        .technicianId(t.getTechnician().getId())
-                        .technicianScore(t.getTechnician().getScore())
-                        .numberOfFinishedTasks(t.getTechnician().getNumberOfFinishedTasks())
-                        .suggestedPrice(t.getTechSuggestedPrice())
-                        .suggestedDate(t.getTechSuggestedDate())
-                        .taskEstimatedDuration(t.getTaskEstimatedDuration()).build();
-                result.add(suggestionDTO);
-            }
-            return result;
-        } catch (NotFoundException e) {
-//            printer.printError(e.getMessage());
-            return null;
+        List<TechnicianSuggestion> suggestions = repository.findByOrderOrderByTechnicianScore(order).orElseThrow(
+                () -> new NotFoundException(Constants.NO_TECHNICIAN_SUGGESTION_FOUND)
+        );
+        List<TechnicianSuggestionDTO> result = new ArrayList<>();
+        for (TechnicianSuggestion t : suggestions) {
+            TechnicianSuggestionDTO suggestionDTO = TechnicianSuggestionDTO.builder()
+                    .suggestionId(t.getId())
+                    .suggestionRegistrationDate(LocalDateTime.now())
+                    .technicianFirstname(t.getTechnician().getFirstName())
+                    .technicianLastname(t.getTechnician().getLastName())
+                    .technicianId(t.getTechnician().getId())
+                    .technicianScore(t.getTechnician().getScore())
+                    .numberOfFinishedTasks(t.getTechnician().getNumberOfFinishedTasks())
+                    .suggestedPrice(t.getTechSuggestedPrice())
+                    .suggestedDate(t.getTechSuggestedDate())
+                    .taskEstimatedDuration(t.getTaskEstimatedDuration()).build();
+            result.add(suggestionDTO);
         }
+        return result;
     }
 }

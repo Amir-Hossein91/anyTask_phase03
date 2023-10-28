@@ -49,9 +49,8 @@ public class TechnicianServiceImpl implements TechnicianService {
             if (image.length > 307200)
                 throw new InvalidImageException(Constants.INVALID_IMAGE_SIZE);
             return true;
-        } catch (IOException | InvalidImageException e) {
-//            printer.printError(e.getMessage());
-            return false;
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -59,122 +58,88 @@ public class TechnicianServiceImpl implements TechnicianService {
         try {
             Files.write(path, image);
         } catch (IOException e) {
-//            printer.printError(Constants.IMAGE_NOT_SAVED_TO_DIRECTORY);
+            throw new RuntimeException(e.getMessage());
         }
     }
 
     @Transactional
     public void addTechnicianToSubAssistance(String managerName, String technicianName,
-                                             String subassistanceTitle, String assistanceTitle) {
+                                             String subAssistanceTitle, String assistanceTitle) {
+
         Manager manager = managerService.findByUsername(managerName);
         if (manager == null)
             throw new IllegalArgumentException("Only manager can add technicians to a sub-assistance");
+        Technician technician = findByUsername(technicianName);
+        Assistance assistance = assistanceService.findAssistance(assistanceTitle);
 
-        try {
-            Technician technician = findByUsername(technicianName);
-            Assistance assistance = assistanceService.findAssistance(assistanceTitle);
+        if (assistance == null)
+            throw new NotFoundException(Constants.ASSISTANCE_NOT_FOUND);
 
-            if (assistance == null)
-                throw new NotFoundException(Constants.ASSISTANCE_NOT_FOUND);
+        SubAssistance subAssistance = subAssistanceService.findSubAssistance(subAssistanceTitle, assistance);
 
-            SubAssistance subAssistance = subAssistanceService.findSubAssistance(subassistanceTitle, assistance);
+        if (technician == null || subAssistance == null)
+            throw new NotFoundException(Constants.TECHNICIAN_OR_SUBASSISTANCE_NOT_FOUND);
 
-            if (technician == null || subAssistance == null)
-                throw new NotFoundException(Constants.TECHNICIAN_OR_SUBASSISTANCE_NOT_FOUND);
+        if (!technician.isActive() && technician.getTechnicianStatus() == TechnicianStatus.APPROVED)
+            throw new DeactivatedTechnicianException(Constants.DEACTIVATED_TECHNICIAN);
 
-            if (!technician.isActive() && technician.getTechnicianStatus() == TechnicianStatus.APPROVED)
-                throw new DeactivatedTechnicianException(Constants.DEACTIVATED_TECHNICIAN);
+        List<Technician> technicians = subAssistance.getTechnicians();
+        if (technicians.contains(technician))
+            throw new DuplicateTechnicianException(Constants.DUPLICATE_TECHNICIAN_SUBASSISTANCE);
 
-            List<Technician> technicians = subAssistance.getTechnicians();
-            if (technicians.contains(technician))
-                throw new DuplicateTechnicianException(Constants.DUPLICATE_TECHNICIAN_SUBASSISTANCE);
-
-            technicians.add(technician);
-            technician.setTechnicianStatus(TechnicianStatus.APPROVED);
-            technician.setActive(true);
-            subAssistanceService.saveOrUpdate(subAssistance);
-
-        } catch (NotFoundException | DeactivatedTechnicianException | DuplicateTechnicianException e) {
-//            printer.printError(e.getMessage());
-        }
+        technicians.add(technician);
+        technician.setTechnicianStatus(TechnicianStatus.APPROVED);
+        technician.setActive(true);
+        subAssistanceService.saveOrUpdate(subAssistance);
     }
 
     @Transactional
     public void removeTechnicianFromSubAssistance(String managerName, String technicianName,
-                                                  String subassistanceTitle, String assistanceTitle) {
+                                                  String subAssistanceTitle, String assistanceTitle) {
+
         Manager manager = managerService.findByUsername(managerName);
         if (manager == null)
             throw new IllegalArgumentException("Only manager can remove technicians from a sub-assistance");
 
-        try {
-            Technician technician = findByUsername(technicianName);
-            Assistance assistance = assistanceService.findAssistance(assistanceTitle);
+        Technician technician = findByUsername(technicianName);
+        Assistance assistance = assistanceService.findAssistance(assistanceTitle);
 
-            if (assistance == null)
-                throw new NotFoundException(Constants.ASSISTANCE_NOT_FOUND);
+        if (assistance == null)
+            throw new NotFoundException(Constants.ASSISTANCE_NOT_FOUND);
 
-            SubAssistance subAssistance = subAssistanceService.findSubAssistance(subassistanceTitle, assistance);
+        SubAssistance subAssistance = subAssistanceService.findSubAssistance(subAssistanceTitle, assistance);
 
-            if (technician == null || subAssistance == null)
-                throw new NotFoundException(Constants.TECHNICIAN_OR_SUBASSISTANCE_NOT_FOUND);
+        if (technician == null || subAssistance == null)
+            throw new NotFoundException(Constants.TECHNICIAN_OR_SUBASSISTANCE_NOT_FOUND);
 
-            List<Technician> technicians = subAssistance.getTechnicians();
-            if (!technicians.contains(technician))
-                throw new NotFoundException(Constants.TECHNICIAN_NOT_IN_LIST);
+        List<Technician> technicians = subAssistance.getTechnicians();
+        if (!technicians.contains(technician))
+            throw new NotFoundException(Constants.TECHNICIAN_NOT_IN_LIST);
 
-            technicians.remove(technician);
-            subAssistanceService.saveOrUpdate(subAssistance);
-
-        } catch (NotFoundException e) {
-//            printer.printError(e.getMessage());
-        }
+        technicians.remove(technician);
+        subAssistanceService.saveOrUpdate(subAssistance);
     }
 
     @Override
     @Transactional
     public Technician saveOrUpdate(Technician t) {
-        try {
-            return repository.save(t);
-        } catch (RuntimeException e) {
-//            printer.printError(e.getMessage());
-//            printer.printError(Arrays.toString(e.getStackTrace()));
-//            input.nextLine();
-            return null;
-        }
+        return repository.save(t);
     }
 
     @Override
     @Transactional
     public void delete(Technician t) {
-        try {
-            repository.delete(t);
-        } catch (RuntimeException e) {
-//            if (e instanceof PersistenceException)
-//                printer.printError("Could not delete " + repository.getClass().getSimpleName());
-//            else
-//                printer.printError("Could not complete deletion. Specified " + repository.getClass().getSimpleName() + " not found!");
-//            printer.printError(Arrays.toString(e.getStackTrace()));
-        }
+        repository.delete(t);
     }
 
     @Override
     public Technician findById(long id) {
-        try {
-            return repository.findById(id).orElseThrow(() -> new NotFoundException("\nCould not find technician with id = " + id));
-        } catch (RuntimeException | NotFoundException e) {
-//            printer.printError(e.getMessage());
-            return null;
-        }
+        return repository.findById(id).orElseThrow(() -> new NotFoundException("\nCould not find technician with id = " + id));
     }
 
     @Override
     public List<Technician> findAll() {
-        try {
-            return repository.findAll();
-        } catch (RuntimeException e) {
-//            printer.printError(e.getMessage());
-            return null;
-        }
+        return repository.findAll();
     }
 
     @Override
@@ -185,15 +150,8 @@ public class TechnicianServiceImpl implements TechnicianService {
     @Override
     @Transactional
     public List<Technician> saveOrUpdate(List<Technician> technicians) {
-        try {
-            technicians = repository.saveAll(technicians);
-            return technicians;
-        } catch (RuntimeException e) {
-//            printer.printError(e.getMessage());
-//            printer.printError(Arrays.toString(e.getStackTrace()));
-//            input.nextLine();
-            return null;
-        }
+        technicians = repository.saveAll(technicians);
+        return technicians;
     }
 
     public List<Technician> showAllTechnicians(String managerUsername) {
@@ -209,24 +167,19 @@ public class TechnicianServiceImpl implements TechnicianService {
         if (manager == null)
             throw new IllegalArgumentException("Only manager can see unapproved technicians");
 
-        try {
-            List<Technician> technicians = repository.findUnapproved().orElse(null);
-            if (technicians == null || technicians.isEmpty())
-                throw new NotFoundException(Constants.NO_UNAPPROVED_TECHNICIANS);
-            boolean isListChanged = false;
-            for (Technician t : technicians) {
-                if (t.getTechnicianStatus() == TechnicianStatus.NEW) {
-                    t.setTechnicianStatus(TechnicianStatus.PENDING);
-                    isListChanged = true;
-                }
+        List<Technician> technicians = repository.findUnapproved().orElse(null);
+        if (technicians == null || technicians.isEmpty())
+            throw new NotFoundException(Constants.NO_UNAPPROVED_TECHNICIANS);
+        boolean isListChanged = false;
+        for (Technician t : technicians) {
+            if (t.getTechnicianStatus() == TechnicianStatus.NEW) {
+                t.setTechnicianStatus(TechnicianStatus.PENDING);
+                isListChanged = true;
             }
-            if (isListChanged)
-                saveOrUpdate(technicians);
-            return technicians;
-        } catch (NotFoundException e) {
-//            printer.printError(e.getMessage());
-            return null;
         }
+        if (isListChanged)
+            saveOrUpdate(technicians);
+        return technicians;
     }
 
     public List<Technician> seeDeactivatedTechnicians(String managerUsername) {
@@ -235,15 +188,10 @@ public class TechnicianServiceImpl implements TechnicianService {
         if (manager == null)
             throw new IllegalArgumentException("Only manager can see deactivated technicians");
 
-        try {
-            List<Technician> technicians = repository.findDeactivated().orElse(null);
-            if (technicians == null || technicians.isEmpty())
-                throw new NotFoundException(Constants.NO_DEACTIVATED_TECHNICIANS);
-            return technicians;
-        } catch (NotFoundException e) {
-//            printer.printError(e.getMessage());
-            return null;
-        }
+        List<Technician> technicians = repository.findDeactivated().orElse(null);
+        if (technicians == null || technicians.isEmpty())
+            throw new NotFoundException(Constants.NO_DEACTIVATED_TECHNICIANS);
+        return technicians;
     }
 
     public List<OrderDTO> findRelatedOrders(String technicianUsername) {
@@ -251,15 +199,10 @@ public class TechnicianServiceImpl implements TechnicianService {
         if (technician == null)
             throw new IllegalArgumentException("Only technicians can see their relative orders");
 
-        try {
-            if (!technician.isActive())
-                throw new DeactivatedTechnicianException(Constants.DEACTIVATED_TECHNICIAN);
+        if (!technician.isActive())
+            throw new DeactivatedTechnicianException(Constants.DEACTIVATED_TECHNICIAN);
 
-            return orderService.findRelatedOrders(technician);
-        } catch (DeactivatedTechnicianException e) {
-//            printer.printError(e.getMessage());
-            return List.of();
-        }
+        return orderService.findRelatedOrders(technician);
     }
 
     @Transactional
@@ -268,18 +211,13 @@ public class TechnicianServiceImpl implements TechnicianService {
         if (technician == null)
             throw new IllegalArgumentException("Only technicians can send suggestions to an order");
 
-        try {
-            if (!technician.isActive())
-                throw new DeactivatedTechnicianException(Constants.DEACTIVATED_TECHNICIAN);
+        if (!technician.isActive())
+            throw new DeactivatedTechnicianException(Constants.DEACTIVATED_TECHNICIAN);
 
-            Order order = orderService.findById(orderId);
-            if (order == null)
-                throw new NotFoundException(Constants.NO_SUCH_ORDER);
+        Order order = orderService.findById(orderId);
+        if (order == null)
+            throw new NotFoundException(Constants.NO_SUCH_ORDER);
 
-            orderService.sendTechnicianSuggestion(technician, order, technicianSuggestion);
-
-        } catch (DeactivatedTechnicianException | NotFoundException e) {
-//            printer.printError(e.getMessage());
-        }
+        orderService.sendTechnicianSuggestion(technician, order, technicianSuggestion);
     }
 }

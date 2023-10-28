@@ -41,72 +41,38 @@ public class PersonServiceImpl implements PersonService {
     public void changePassword(String username, String oldPassword, String newPassword) {
         Person fetched = findByUsername(username);
         if (fetched != null) {
-            try {
-                if (!fetched.getPassword().equals(oldPassword))
-                    throw new IllegalArgumentException(Constants.INCORRECT_PASSWORD);
-                fetched.setPassword(newPassword);
-                saveOrUpdate(fetched);
-            } catch (IllegalArgumentException e) {
-//                printer.printError(e.getMessage());
-            }
+            if (!fetched.getPassword().equals(oldPassword))
+                throw new IllegalArgumentException(Constants.INCORRECT_PASSWORD);
+            fetched.setPassword(newPassword);
+            saveOrUpdate(fetched);
         }
     }
 
     @Override
     @Transactional
     public Person saveOrUpdate(Person t) {
-        try {
-            return repository.save(t);
-        } catch (RuntimeException e) {
-//            printer.printError(e.getMessage());
-//            printer.printError(Arrays.toString(e.getStackTrace()));
-//            input.nextLine();
-            return null;
-        }
+        return repository.save(t);
     }
 
     @Override
     @Transactional
     public void delete(Person t) {
-        try {
-            repository.delete(t);
-        } catch (RuntimeException e) {
-//            if(e instanceof PersistenceException)
-//                printer.printError("Could not delete " + repository.getClass().getSimpleName());
-//            else
-//                printer.printError("Could not complete deletion. Specified " + repository.getClass().getSimpleName() + " not found!");
-//            printer.printError(Arrays.toString(e.getStackTrace()));
-        }
+        repository.delete(t);
     }
 
     @Override
     public Person findById(long id) {
-        try {
-            return repository.findById(id).orElseThrow(() -> new NotFoundException("\nCould not find person with id = " + id));
-        } catch (RuntimeException | NotFoundException e) {
-//            printer.printError(e.getMessage());
-            return null;
-        }
+        return repository.findById(id).orElseThrow(() -> new NotFoundException("\nCould not find person with id = " + id));
     }
 
     @Override
     public List<Person> findAll() {
-        try {
-            return repository.findAll();
-        } catch (RuntimeException e) {
-//            printer.printError(e.getMessage());
-            return null;
-        }
+        return repository.findAll();
     }
 
     @Override
     public Person findByUsername(String username) {
-        try {
-            return repository.findByUsername(username).orElseThrow(() -> new NotFoundException(Constants.INVALID_USERNAME));
-        } catch (RuntimeException | NotFoundException e) {
-//            printer.printError(e.getMessage());
-            return null;
-        }
+        return repository.findByUsername(username).orElseThrow(() -> new NotFoundException(Constants.INVALID_USERNAME));
     }
 
     @Transactional
@@ -130,25 +96,17 @@ public class PersonServiceImpl implements PersonService {
 
     @Transactional
     public Person registerManager(Manager manager) {
-        if (managerService.doesManagerExist()) {
-//            printer.printError("This organization already has a defined manager");
-            return null;
-        }
+        if (managerService.doesManagerExist())
+            throw new IllegalArgumentException("This organization already has a defined manager");
         return managerService.saveOrUpdate(manager);
     }
 
     public void login(String username, String password) {
         isLoggedIn = false;
         Person fetched = findByUsername(username);
-        if (fetched != null) {
-            try {
-                if (!fetched.getPassword().equals(password))
-                    throw new IllegalArgumentException(Constants.INCORRECT_USERNAME_PASSWORD);
-                isLoggedIn = true;
-//                printer.printMessage("Hello " + fetched.getFirstName() + ", you are a " + fetched.getClass().getSimpleName() + " here!");
-            } catch (IllegalArgumentException e) {
-//                printer.printError(e.getMessage());
-            }
-        }
+        if(fetched == null || !fetched.getPassword().equals(password))
+            throw new NotFoundException(Constants.INCORRECT_USERNAME_PASSWORD);
+        isLoggedIn = true;
+//          printer.printMessage("Hello " + fetched.getFirstName() + ", you are a " + fetched.getClass().getSimpleName() + " here!");
     }
 }

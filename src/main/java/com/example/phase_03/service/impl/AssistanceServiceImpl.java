@@ -10,12 +10,10 @@ import com.example.phase_03.exceptions.NotFoundException;
 import com.example.phase_03.repository.AssistanceRepository;
 import com.example.phase_03.service.AssistanceService;
 import com.example.phase_03.utility.Constants;
-import jakarta.persistence.PersistenceException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -37,49 +35,23 @@ public class AssistanceServiceImpl implements AssistanceService {
     @Override
     @Transactional
     public Assistance saveOrUpdate(Assistance t) {
-        try {
-            return repository.save(t);
-        } catch (RuntimeException e) {
-//            printer.printError(e.getMessage());
-//            printer.printError(Arrays.toString(e.getStackTrace()));
-//            input.nextLine();
-            return null;
-        }
+        return repository.save(t);
     }
 
     @Override
     @Transactional
     public void delete(Assistance t) {
-        try {
-            repository.delete(t);
-        } catch (RuntimeException e) {
-//            if(e instanceof PersistenceException)
-//                printer.printError("Could not delete " + repository.getClass().getSimpleName());
-//            else
-//                printer.printError("Could not complete deletion. Specified " + repository.getClass().getSimpleName() + " not found!");
-//            printer.printError(Arrays.toString(e.getStackTrace()));
-        }
-
+        repository.delete(t);
     }
 
     @Override
     public Assistance findById(long id) {
-        try {
-            return repository.findById(id).orElseThrow(() -> new NotFoundException("\nCould not find assistance with id = " + id));
-        } catch (RuntimeException | NotFoundException e) {
-//            printer.printError(e.getMessage());
-            return null;
-        }
+        return repository.findById(id).orElseThrow(() -> new NotFoundException("\nCould not find assistance with id = " + id));
     }
 
     @Override
     public List<Assistance> findAll() {
-        try {
-            return repository.findAll();
-        } catch (RuntimeException e) {
-//            printer.printError(e.getMessage());
-            return null;
-        }
+        return repository.findAll();
     }
 
     @Override
@@ -92,26 +64,17 @@ public class AssistanceServiceImpl implements AssistanceService {
         Manager manager = managerService.findByUsername(username);
         if (manager == null)
             throw new IllegalArgumentException("Only manager can add assistance categories");
-        try {
-            if (findAssistance(assistance.getTitle()) != null)
-                throw new DuplicateAssistanceException(Constants.ASSISTANCE_ALREADY_EXISTS);
-            saveOrUpdate(assistance);
-        } catch (DuplicateAssistanceException | IllegalArgumentException e) {
-//                printer.printError(e.getMessage());
-        }
+        if (findAssistance(assistance.getTitle()) != null)
+            throw new DuplicateAssistanceException(Constants.ASSISTANCE_ALREADY_EXISTS);
+        saveOrUpdate(assistance);
     }
 
     public List<String> seeAssistances(String personUsername) {
         Person person = personService.findByUsername(personUsername);
-        try {
             if (person == null)
                 throw new NotFoundException(Constants.INVALID_USERNAME);
             if (person instanceof Technician && !((Technician) person).isActive())
                 throw new DeactivatedTechnicianException(Constants.DEACTIVATED_TECHNICIAN);
             return findAll().stream().map(Object::toString).toList();
-        } catch (NotFoundException | DeactivatedTechnicianException e) {
-//            printer.printError(e.getMessage());
-            return List.of();
-        }
     }
 }
