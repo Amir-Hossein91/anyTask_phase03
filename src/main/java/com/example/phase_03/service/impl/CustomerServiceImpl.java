@@ -1,7 +1,6 @@
 package com.example.phase_03.service.impl;
 
 import com.example.phase_03.entity.*;
-import com.example.phase_03.entity.dto.TechnicianSuggestionDTO;
 import com.example.phase_03.entity.enums.OrderStatus;
 import com.example.phase_03.exceptions.NotEnoughCreditException;
 import com.example.phase_03.exceptions.NotFoundException;
@@ -60,7 +59,7 @@ public class CustomerServiceImpl implements CustomerService {
         return true;
     }
 
-    public List<TechnicianSuggestionDTO> seeTechnicianSuggestionsOrderedByPrice(String customerUsername, long orderId) {
+    public List<TechnicianSuggestion> seeTechnicianSuggestionsOrderedByPrice(String customerUsername, long orderId) {
         Customer customer = findByUsername(customerUsername);
         if (customer == null)
             throw new IllegalArgumentException("Only customers have access to this function");
@@ -69,7 +68,7 @@ public class CustomerServiceImpl implements CustomerService {
         if (!isSuggestionChoosingPossible(customer, order))
             throw new IllegalStateException("Can not see the technician suggestions");
 
-        List<TechnicianSuggestionDTO> technicianSuggestions = technicianSuggestionService.getSuggestionsOrderedByPrice(order);
+        List<TechnicianSuggestion> technicianSuggestions = technicianSuggestionService.getSuggestionsOrderedByPrice(order);
         if (technicianSuggestions == null)
             throw new NotFoundException("No technician suggestion available for this order");
 
@@ -81,7 +80,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     }
 
-    public List<TechnicianSuggestionDTO> seeTechnicianSuggestionsOrderedByScore(String customerUsername, long orderId) {
+    public List<TechnicianSuggestion> seeTechnicianSuggestionsOrderedByScore(String customerUsername, long orderId) {
         Customer customer = findByUsername(customerUsername);
         if (customer == null)
             throw new IllegalArgumentException("Only customers have access to this function");
@@ -90,7 +89,7 @@ public class CustomerServiceImpl implements CustomerService {
         if (!isSuggestionChoosingPossible(customer, order))
             throw new IllegalStateException("Can not see the technician suggestions");
 
-        List<TechnicianSuggestionDTO> technicianSuggestions = technicianSuggestionService.getSuggestionsOrderedByScore(order);
+        List<TechnicianSuggestion> technicianSuggestions = technicianSuggestionService.getSuggestionsOrderedByScore(order);
         if (technicianSuggestions == null)
             throw new NotFoundException("No technician suggestion available for this order");
 
@@ -111,13 +110,13 @@ public class CustomerServiceImpl implements CustomerService {
         if (!isSuggestionChoosingPossible(customer, order))
             throw new IllegalStateException("Can not choose a technician suggestion in this state");
 
-        List<TechnicianSuggestionDTO> technicianSuggestions = technicianSuggestionService.getSuggestionsOrderedByPrice(order);
+        List<TechnicianSuggestion> technicianSuggestions = technicianSuggestionService.getSuggestionsOrderedByPrice(order);
 
         if (technicianSuggestions == null)
             throw new NotFoundException(Constants.NO_TECHNICIAN_SUGGESTION_FOUND);
 
         List<Long> suggestionsIds = technicianSuggestions.stream()
-                .map(TechnicianSuggestionDTO::getSuggestionId)
+                .map(TechnicianSuggestion::getId)
                 .toList();
 
         TechnicianSuggestion suggestion = technicianSuggestionService.findById(suggestionId);
@@ -148,10 +147,10 @@ public class CustomerServiceImpl implements CustomerService {
         if (order.getOrderStatus() != OrderStatus.TECHNICIAN_IS_ON_THE_WAY)
             throw new IllegalStateException(Constants.NO_TECHNICIAN_SELECTED);
 
-        List<TechnicianSuggestionDTO> technicianSuggestions = technicianSuggestionService.getSuggestionsOrderedByPrice(order);
+        List<TechnicianSuggestion> technicianSuggestions = technicianSuggestionService.getSuggestionsOrderedByPrice(order);
 
         List<Long> suggestionsIds = technicianSuggestions.stream()
-                .map(TechnicianSuggestionDTO::getSuggestionId)
+                .map(TechnicianSuggestion::getId)
                 .toList();
 
         TechnicianSuggestion suggestion = technicianSuggestionService.findById(suggestionId);
@@ -186,10 +185,10 @@ public class CustomerServiceImpl implements CustomerService {
         if (order.getOrderStatus() != OrderStatus.STARTED)
             throw new IllegalStateException(Constants.ORDER_NOT_STARTED);
 
-        List<TechnicianSuggestionDTO> technicianSuggestions = technicianSuggestionService.getSuggestionsOrderedByPrice(order);
+        List<TechnicianSuggestion> technicianSuggestions = technicianSuggestionService.getSuggestionsOrderedByPrice(order);
 
         List<Long> suggestionsIds = technicianSuggestions.stream()
-                .map(TechnicianSuggestionDTO::getSuggestionId)
+                .map(TechnicianSuggestion::getId)
                 .toList();
 
         TechnicianSuggestion suggestion = technicianSuggestionService.findById(suggestionId);

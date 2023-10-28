@@ -18,12 +18,17 @@ import java.time.LocalDateTime;
 @RequestMapping("/orders")
 public class OrderController {
 
-    @Autowired
     OrderServiceImpl orderService;
-    @Autowired
     SubAssistanceServiceImpl subAssistanceService;
-    @Autowired
     CustomerServiceImpl customerService;
+
+    public OrderController(OrderServiceImpl orderService,
+                           SubAssistanceServiceImpl subAssistanceService,
+                           CustomerServiceImpl customerService){
+        this.orderService = orderService;
+        this.subAssistanceService = subAssistanceService;
+        this.customerService = customerService;
+    }
 
     @PostMapping("/printModel")
     void printModel (@RequestBody OrderRequestDTO orderRequestDTO){

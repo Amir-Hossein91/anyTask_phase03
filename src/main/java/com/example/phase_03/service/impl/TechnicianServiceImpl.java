@@ -1,7 +1,6 @@
 package com.example.phase_03.service.impl;
 
 import com.example.phase_03.entity.*;
-import com.example.phase_03.entity.dto.OrderDTO;
 import com.example.phase_03.entity.enums.TechnicianStatus;
 import com.example.phase_03.exceptions.DeactivatedTechnicianException;
 import com.example.phase_03.exceptions.DuplicateTechnicianException;
@@ -194,7 +193,7 @@ public class TechnicianServiceImpl implements TechnicianService {
         return technicians;
     }
 
-    public List<OrderDTO> findRelatedOrders(String technicianUsername) {
+    public List<Order> findRelatedOrders(String technicianUsername) {
         Technician technician = findByUsername(technicianUsername);
         if (technician == null)
             throw new IllegalArgumentException("Only technicians can see their relative orders");

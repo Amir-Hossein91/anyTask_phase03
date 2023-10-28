@@ -3,7 +3,6 @@ package com.example.phase_03.service.impl;
 import com.example.phase_03.entity.Manager;
 import com.example.phase_03.entity.Order;
 import com.example.phase_03.entity.TechnicianSuggestion;
-import com.example.phase_03.entity.dto.TechnicianSuggestionDTO;
 import com.example.phase_03.exceptions.NotFoundException;
 import com.example.phase_03.repository.TechnicianSuggestionRepository;
 import com.example.phase_03.service.TechnicianSuggestionService;
@@ -59,48 +58,16 @@ public class TechnicianSuggestionServiceImpl implements TechnicianSuggestionServ
     }
 
     @Override
-    public List<TechnicianSuggestionDTO> getSuggestionsOrderedByPrice(Order order) {
-        List<TechnicianSuggestion> suggestions = repository.findByOrderOrderByTechSuggestedPriceAsc(order).orElseThrow(
+    public List<TechnicianSuggestion> getSuggestionsOrderedByPrice(Order order) {
+        return repository.findByOrderOrderByTechSuggestedPriceAsc(order).orElseThrow(
                 () -> new NotFoundException(Constants.NO_TECHNICIAN_SUGGESTION_FOUND)
         );
-        List<TechnicianSuggestionDTO> result = new ArrayList<>();
-        for (TechnicianSuggestion t : suggestions) {
-            TechnicianSuggestionDTO suggestionDTO = TechnicianSuggestionDTO.builder()
-                    .suggestionId(t.getId())
-                    .suggestionRegistrationDate(LocalDateTime.now())
-                    .technicianFirstname(t.getTechnician().getFirstName())
-                    .technicianLastname(t.getTechnician().getLastName())
-                    .technicianId(t.getTechnician().getId())
-                    .technicianScore(t.getTechnician().getScore())
-                    .numberOfFinishedTasks(t.getTechnician().getNumberOfFinishedTasks())
-                    .suggestedPrice(t.getTechSuggestedPrice())
-                    .suggestedDate(t.getTechSuggestedDate())
-                    .taskEstimatedDuration(t.getTaskEstimatedDuration()).build();
-            result.add(suggestionDTO);
-        }
-        return result;
     }
 
     @Override
-    public List<TechnicianSuggestionDTO> getSuggestionsOrderedByScore(Order order) {
-        List<TechnicianSuggestion> suggestions = repository.findByOrderOrderByTechnicianScore(order).orElseThrow(
+    public List<TechnicianSuggestion> getSuggestionsOrderedByScore(Order order) {
+        return repository.findByOrderOrderByTechnicianScore(order).orElseThrow(
                 () -> new NotFoundException(Constants.NO_TECHNICIAN_SUGGESTION_FOUND)
         );
-        List<TechnicianSuggestionDTO> result = new ArrayList<>();
-        for (TechnicianSuggestion t : suggestions) {
-            TechnicianSuggestionDTO suggestionDTO = TechnicianSuggestionDTO.builder()
-                    .suggestionId(t.getId())
-                    .suggestionRegistrationDate(LocalDateTime.now())
-                    .technicianFirstname(t.getTechnician().getFirstName())
-                    .technicianLastname(t.getTechnician().getLastName())
-                    .technicianId(t.getTechnician().getId())
-                    .technicianScore(t.getTechnician().getScore())
-                    .numberOfFinishedTasks(t.getTechnician().getNumberOfFinishedTasks())
-                    .suggestedPrice(t.getTechSuggestedPrice())
-                    .suggestedDate(t.getTechSuggestedDate())
-                    .taskEstimatedDuration(t.getTaskEstimatedDuration()).build();
-            result.add(suggestionDTO);
-        }
-        return result;
     }
 }

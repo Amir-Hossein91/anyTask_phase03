@@ -1,7 +1,6 @@
 package com.example.phase_03.service.impl;
 
 import com.example.phase_03.entity.*;
-import com.example.phase_03.entity.dto.OrderDTO;
 import com.example.phase_03.entity.enums.OrderStatus;
 import com.example.phase_03.exceptions.NotFoundException;
 import com.example.phase_03.repository.OrderRepository;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -94,25 +92,11 @@ public class OrderServiceImpl implements OrderService {
         return repository.findAll();
     }
 
-    public List<OrderDTO> findRelatedOrders(Technician technician) {
+    public List<Order> findRelatedOrders(Technician technician) {
         List<Order> fetchedOrders = repository.findRelatedOrders(technician).orElseThrow(
                 () -> new NotFoundException(Constants.NO_RELATED_ORDERS)
         );
-        List<OrderDTO> orderDTOs = new ArrayList<>();
-        for (Order o : fetchedOrders) {
-            OrderDTO orderDTO = OrderDTO.builder()
-                    .orderId(o.getId())
-                    .subAssistanceTitle(o.getSubAssistance().getTitle())
-                    .assistanceTitle(o.getSubAssistance().getAssistance().getTitle())
-                    .basePrice(o.getSubAssistance().getBasePrice())
-                    .customerFirstname(o.getCustomer().getFirstName())
-                    .customerLastname(o.getCustomer().getLastName())
-                    .customerId(o.getCustomer().getId())
-                    .orderDate(o.getOrderRegistrationDateAndTime())
-                    .orderDescription(o.getOrderDescription()).build();
-            orderDTOs.add(orderDTO);
-        }
-        return orderDTOs;
+        return fetchedOrders;
     }
 
     @Override

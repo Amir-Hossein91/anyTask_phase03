@@ -21,8 +21,11 @@ import java.time.LocalDateTime;
 @RequestMapping("/technician")
 public class TechnicianController {
 
-    @Autowired
     TechnicianServiceImpl technicianService;
+
+    public TechnicianController (TechnicianServiceImpl technicianService){
+        this.technicianService = technicianService;
+    }
 
     @PostMapping(value = "/save")
     public ResponseEntity<TechnicianResponseDTO> saveTechnician (@RequestBody @Valid TechnicianRequestDTO requestDTO) throws IOException {
