@@ -17,13 +17,13 @@ public class RestExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> illegalArgumentExceptionHandler(IllegalArgumentException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<String> runTimeExceptionHandler(RuntimeException e) {
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<String> illegalStateExceptionHandler(IllegalStateException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
     @ExceptionHandler(PersistenceException.class)
@@ -41,25 +41,25 @@ public class RestExceptionHandler {
     @ExceptionHandler(DeactivatedTechnicianException.class)
     public ResponseEntity<String> deactivatedTechnicianExceptionHandler(DeactivatedTechnicianException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
     @ExceptionHandler(DuplicateAssistanceException.class)
     public ResponseEntity<String> duplicateAssistanceExceptionHandler(DuplicateAssistanceException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
     @ExceptionHandler(DuplicateSubAssistanceException.class)
     public ResponseEntity<String> duplicateSubAssistanceExceptionHandler(DuplicateSubAssistanceException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
     @ExceptionHandler(DuplicateTechnicianException.class)
     public ResponseEntity<String> duplicateTechnicianExceptionHandler(DuplicateTechnicianException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
     @ExceptionHandler(InvalidImageException.class)
@@ -77,17 +77,23 @@ public class RestExceptionHandler {
     @ExceptionHandler(NotEnoughCreditException.class)
     public ResponseEntity<String> notEnoughCreditExceptionHandler(NotEnoughCreditException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<String> notFoundExceptionHandler(NotFoundException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
     @ExceptionHandler(NotSavedException.class)
     public ResponseEntity<String> notSavedExceptionHandler(NotSavedException e) {
+        log.error(e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> runTimeExceptionHandler(RuntimeException e) {
         log.error(e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
