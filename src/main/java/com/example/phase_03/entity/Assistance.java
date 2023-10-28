@@ -1,6 +1,7 @@
 package com.example.phase_03.entity;
 
 import com.example.phase_03.entity.base.BaseEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.validation.constraints.NotNull;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class Assistance extends BaseEntity {
     @NotNull(message = "Assistance title can not be null")
+    @Column(unique = true)
     private String title;
 
     public String toString() {

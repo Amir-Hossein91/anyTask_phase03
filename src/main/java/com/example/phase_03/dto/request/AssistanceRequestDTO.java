@@ -1,8 +1,8 @@
 package com.example.phase_03.dto.request;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 public record AssistanceRequestDTO(
-        @NotNull(message = "Assistance title can not be null")
-        String title) {
+                                @NotBlank(message = "Assistance title can not be blank")
+                                String title) {
 }
