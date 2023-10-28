@@ -70,7 +70,7 @@ public class ManagerController {
                 .modelToDto(subAssistanceService.addSubAssistance(subAssistance,subAssistance.getAssistance().getTitle())),HttpStatus.CREATED);
     }
 
-    @GetMapping("/newTechnicians")
+    @GetMapping("/unapprovedTechnicians")
     public ResponseEntity<List<TechnicianResponseDTO>> seeNewTechnicians(){
 
         List<Technician> technicians = technicianService.seeUnapprovedTechnicians();
