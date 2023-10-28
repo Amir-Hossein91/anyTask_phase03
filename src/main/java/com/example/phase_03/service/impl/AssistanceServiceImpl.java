@@ -60,13 +60,10 @@ public class AssistanceServiceImpl implements AssistanceService {
         return repository.findByTitle(assistanceName).orElse(null);
     }
 
-    public void addAssistance(String username, Assistance assistance) {
-        Manager manager = managerService.findByUsername(username);
-        if (manager == null)
-            throw new IllegalArgumentException("Only manager can add assistance categories");
+    public Assistance addAssistance(Assistance assistance) {
         if (findAssistance(assistance.getTitle()) != null)
             throw new DuplicateAssistanceException(Constants.ASSISTANCE_ALREADY_EXISTS);
-        saveOrUpdate(assistance);
+        return saveOrUpdate(assistance);
     }
 
     public List<String> seeAssistances(String personUsername) {

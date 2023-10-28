@@ -76,26 +76,19 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Transactional
-    public Person registerCustomer(Customer person) {
+    public Customer registerCustomer(Customer person) {
         return customerService.saveOrUpdate(person);
     }
 
     @Transactional
-    public Person registerTechnician(Technician technician, Path inputPath, Path outputPath) throws IOException {
-
-        if (!technicianService.validateImage(inputPath))
-            return null;
-        byte[] image = Files.readAllBytes(inputPath);
+    public Technician registerTechnician(Technician technician) {
         if (technician == null)
             return null;
-        technician.setImage(image);
-        Technician savedTechnician = technicianService.saveOrUpdate(technician);
-        technicianService.saveImageToDirectory(outputPath, Files.readAllBytes(inputPath));
-        return savedTechnician;
+        return technicianService.saveOrUpdate(technician);
     }
 
     @Transactional
-    public Person registerManager(Manager manager) {
+    public Manager registerManager(Manager manager) {
         if (managerService.doesManagerExist())
             throw new IllegalArgumentException("This organization already has a defined manager");
         return managerService.saveOrUpdate(manager);

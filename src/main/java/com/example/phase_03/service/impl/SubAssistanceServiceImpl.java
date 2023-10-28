@@ -61,23 +61,14 @@ public class SubAssistanceServiceImpl implements SubAssistanceService {
     }
 
     @Transactional
-    public void addSubAssistance(String username, String assistanceTitle, String subAssistanceTitle, Long basePrice, String description) {
-        Manager manager = managerService.findByUsername(username);
-        if (manager == null)
-            throw new IllegalArgumentException("Only manager can add sub-assistance titles");
-
+    public SubAssistance addSubAssistance( SubAssistance subAssistance ,String assistanceTitle) {
         Assistance assistance = assistanceService.findAssistance(assistanceTitle);
         if (assistance == null)
             throw new NoSuchAsssistanceCategoryException(Constants.NO_SUCH_ASSISTANCE_CATEGORY);
-        if (findSubAssistance(subAssistanceTitle, assistance) != null)
+        if (findSubAssistance(subAssistance.getTitle(), assistance) != null)
             throw new DuplicateSubAssistanceException(Constants.SUBASSISTANCE_ALREADY_EXISTS);
-        SubAssistance subAssistance = SubAssistance.builder()
-                .assistance(assistance)
-                .title(subAssistanceTitle)
-                .basePrice(basePrice)
-                .about(description)
-                .build();
-        saveOrUpdate(subAssistance);
+        subAssistance.setAssistance(assistance);
+        return saveOrUpdate(subAssistance);
     }
 
     public List<String> showSubAssistances(String userName) {

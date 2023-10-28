@@ -5,8 +5,8 @@ import com.example.phase_03.dto.response.CustomerResponseDTO;
 import com.example.phase_03.entity.Customer;
 import com.example.phase_03.mapper.CustomerMapper;
 import com.example.phase_03.service.impl.CustomerServiceImpl;
+import com.example.phase_03.service.impl.PersonServiceImpl;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,15 +20,22 @@ import java.time.LocalDateTime;
 @RequestMapping("/customer")
 public class CustomerController {
 
-    @Autowired
-    CustomerServiceImpl customerService;
 
-    @PostMapping("/save")
+    private final CustomerServiceImpl customerService;
+    private final PersonServiceImpl personService;
+
+    public CustomerController(CustomerServiceImpl customerService,
+                              PersonServiceImpl personService) {
+        this.customerService = customerService;
+        this.personService = personService;
+    }
+
+    @PostMapping("/register")
     public ResponseEntity<CustomerResponseDTO> saveCustomer (@RequestBody @Valid CustomerRequestDTO requestDTO){
         Customer customer = CustomerMapper.INSTANCE.dtoToModel(requestDTO);
         customer.setRegistrationDate(LocalDateTime.now());
 
-        customerService.saveOrUpdate(customer);
+        personService.registerCustomer(customer);
         return new ResponseEntity<>(CustomerMapper.INSTANCE.modelToDto(customerService.findById(customer.getId())), HttpStatus.CREATED);
     }
 

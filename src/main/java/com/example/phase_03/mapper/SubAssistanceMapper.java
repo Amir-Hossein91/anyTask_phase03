@@ -18,5 +18,5 @@ public interface SubAssistanceMapper {
     SubAssistance dtoToModel (SubAssistanceRequestDTO requestDTO);
 
     @Mapping(target = "assistanceTitle" , source = "subAssistance.assistance.title")
-    SubAssistanceResponseDTO moderToDto (SubAssistance subAssistance);
+    SubAssistanceResponseDTO modelToDto (SubAssistance subAssistance);
 }
