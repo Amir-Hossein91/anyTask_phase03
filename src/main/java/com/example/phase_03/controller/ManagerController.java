@@ -173,5 +173,16 @@ public class ManagerController {
         return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
 
+    @GetMapping("/getDeactivated/{username}")
+    public ResponseEntity<List<TechnicianResponseDTO>> findDeactivatedTechnicians (@PathVariable String username){
+        List<Technician> deactivatedList = technicianService.seeDeactivatedTechnicians(username);
+        List<TechnicianResponseDTO> responseDTOS = new ArrayList<>();
+
+        for(Technician t : deactivatedList)
+            responseDTOS.add(TechnicianMapper.INSTANCE.modelToDto(t));
+
+        return new ResponseEntity<>(responseDTOS,HttpStatus.OK);
+    }
+
 
 }
