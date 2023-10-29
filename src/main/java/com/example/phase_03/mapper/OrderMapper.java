@@ -15,12 +15,12 @@ public interface OrderMapper {
     OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
 
     @Mapping(target = "subAssistance.title", source = "subAssistanceTitle")
-    @Mapping(target = "customer.id", source = "customerId")
+    @Mapping(target = "customer.username", source = "customerUsername")
     @Mapping(target = "orderDescription.customerSuggestedPrice", source = "customerSuggestedPrice")
     @Mapping(target = "orderDescription.customerDesiredDateAndTime", source = "customerDesiredDateAndTime")
     @Mapping(target = "orderDescription.taskDetails", source = "taskDetails")
     @Mapping(target = "orderDescription.address", source = "address")
-    @Mapping(target = "technicianScore", source = "technicianScore")
+    @Mapping(target = "subAssistance.assistance.title", source = "assistanceTitle")
     Order dtoToModel (OrderRequestDTO requestDTO);
 
     @Mapping(target = "subAssistanceTitle", source = "order.subAssistance.title")
