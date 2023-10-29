@@ -23,7 +23,7 @@ import java.util.List;
 public class Order extends BaseEntity {
     @ManyToOne
     private SubAssistance subAssistance;
-    @OneToOne
+    @ManyToOne
     private Customer customer;
     @OneToOne
     private Technician technician;
