@@ -1,4 +1,4 @@
-package com.example.phase_03.controller.jsonClasses;
+package com.example.phase_03.controller.requestObjects;
 
 import lombok.Data;
 

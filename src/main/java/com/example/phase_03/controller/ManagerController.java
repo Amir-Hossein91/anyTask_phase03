@@ -1,6 +1,6 @@
 package com.example.phase_03.controller;
 
-import com.example.phase_03.controller.jsonClasses.AssignTechnician;
+import com.example.phase_03.controller.requestObjects.AssignTechnician;
 import com.example.phase_03.dto.request.AssistanceRequestDTO;
 import com.example.phase_03.dto.request.ManagerRequestDTO;
 import com.example.phase_03.dto.request.SubAssistanceRequestDTO;
@@ -140,4 +140,6 @@ public class ManagerController {
         }
         return new ResponseEntity<>(result,HttpStatus.OK);
     }
+
+
 }
