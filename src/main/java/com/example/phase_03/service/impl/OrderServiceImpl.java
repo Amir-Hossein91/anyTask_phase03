@@ -43,7 +43,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Transactional
-    public Order makeOrder(String customerUsername, String assistanceTitle, String subAssistanceTitle, OrderDescription orderDescription) {
+    public Order makeOrder(String customerUsername, String subAssistanceTitle, String assistanceTitle, OrderDescription orderDescription) {
         Customer customer = customerService.findByUsername(customerUsername);
         if (customer == null)
             throw new IllegalArgumentException("Only a customer can make an order");
