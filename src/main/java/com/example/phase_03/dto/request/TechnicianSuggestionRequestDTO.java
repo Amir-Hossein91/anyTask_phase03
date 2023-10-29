@@ -6,7 +6,7 @@ import org.hibernate.validator.constraints.Range;
 
 import java.time.LocalDateTime;
 
-public record TechnicianSuggestionRequestDTO (long technicianId,
+public record TechnicianSuggestionRequestDTO (String technicianUsername,
                                               long orderId,
                                               @Range(min = 0, message = "Price can not be negative")
                                               long techSuggestedPrice,
