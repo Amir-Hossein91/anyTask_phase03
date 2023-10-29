@@ -6,7 +6,6 @@ import com.example.phase_03.mapper.OrderMapper;
 import com.example.phase_03.service.impl.CustomerServiceImpl;
 import com.example.phase_03.service.impl.OrderServiceImpl;
 import com.example.phase_03.service.impl.SubAssistanceServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
