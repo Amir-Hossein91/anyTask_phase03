@@ -36,23 +36,23 @@ public class SubAssistanceServiceImpl implements SubAssistanceService {
     @Override
     @Transactional
     public SubAssistance saveOrUpdate(SubAssistance t) {
-            return repository.save(t);
+        return repository.save(t);
     }
 
     @Override
     @Transactional
     public void delete(SubAssistance t) {
-            repository.delete(t);
+        repository.delete(t);
     }
 
     @Override
     public SubAssistance findById(long id) {
-            return repository.findById(id).orElseThrow(() -> new NotFoundException("\nCould not find sub-assistance with id = " + id));
+        return repository.findById(id).orElseThrow(() -> new NotFoundException("\nCould not find sub-assistance with id = " + id));
     }
 
     @Override
     public List<SubAssistance> findAll() {
-            return repository.findAll();
+        return repository.findAll();
     }
 
     @Override
@@ -66,7 +66,7 @@ public class SubAssistanceServiceImpl implements SubAssistanceService {
     }
 
     @Transactional
-    public SubAssistance addSubAssistance( SubAssistance subAssistance ,String assistanceTitle) {
+    public SubAssistance addSubAssistance(SubAssistance subAssistance, String assistanceTitle) {
         Assistance assistance = assistanceService.findAssistance(assistanceTitle);
         if (assistance == null)
             throw new NoSuchAsssistanceCategoryException(Constants.NO_SUCH_ASSISTANCE_CATEGORY);
@@ -78,38 +78,25 @@ public class SubAssistanceServiceImpl implements SubAssistanceService {
 
 
     @Transactional
-    public List<SubAssistance> showSubAssistances(String userName) {
+    public List<SubAssistance> showSubAssistancesToManager(String userName) {
         Person person = personService.findByUsername(userName);
         if (person instanceof Manager) {
             return findAll();
-        } else {
-            if (person instanceof Technician && !((Technician) person).isActive())
-                throw new DeactivatedTechnicianException(Constants.DEACTIVATED_TECHNICIAN);
-            List<SubAssistance> subAssistanceList = findAll();
-//            Map<String, List<String>> result = new HashMap<>();
-//            for (SubAssistance s : subAssistanceList) {
-//                String assistance = s.getAssistance().getTitle();
-//                String subAssistance = s.getTitle() + "--> base price = " + s.getBasePrice()
-//                        + ", description = " + s.getAbout();
-//                if (result.containsKey(assistance)) {
-//                    result.get(assistance).add(subAssistance);
-//                } else
-//                    result.put(assistance, new ArrayList<>(List.of(subAssistance)));
-//            }
-//            StringBuilder stringBuilder = new StringBuilder();
-//
-//            for (Map.Entry<String, List<String>> m : result.entrySet()) {
-//                stringBuilder.append(m.getKey()).append(": \n");
-//                for (String s : result.get(m.getKey())) {
-//                    stringBuilder.append("\t*").append(s).append("\n");
-//                }
-//            }
-            return subAssistanceList;
-        }
+        } else
+            throw new IllegalArgumentException("This operation is only valid for manager");
     }
 
     @Transactional
-    public void changeDescription( String subAssistanceTitle, String assistanceTitle, String newDescription) {
+    public List<SubAssistance> showSubAssistancesToOthers(String userName) {
+        Person person = personService.findByUsername(userName);
+
+        if (person instanceof Technician && !((Technician) person).isActive())
+            throw new DeactivatedTechnicianException(Constants.DEACTIVATED_TECHNICIAN);
+        return findAll();
+    }
+
+    @Transactional
+    public void changeDescription(String subAssistanceTitle, String assistanceTitle, String newDescription) {
 
         Assistance assistance = assistanceService.findAssistance(assistanceTitle);
         if (assistance == null)
@@ -122,7 +109,7 @@ public class SubAssistanceServiceImpl implements SubAssistanceService {
     }
 
     @Transactional
-    public void changeBasePrice( String subAssistanceTitle, String assistanceTitle, long basePrice) {
+    public void changeBasePrice(String subAssistanceTitle, String assistanceTitle, long basePrice) {
 
         Assistance assistance = assistanceService.findAssistance(assistanceTitle);
         if (assistance == null)
