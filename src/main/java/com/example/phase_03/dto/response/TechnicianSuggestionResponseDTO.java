@@ -3,7 +3,11 @@ package com.example.phase_03.dto.response;
 import java.time.LocalDateTime;
 
 public record TechnicianSuggestionResponseDTO(long id,
-                                              long technicianId,
+                                              String technicianUsername,
+                                              int technicianScore,
                                               long orderId,
-                                              LocalDateTime DateAndTimeOfTechSuggestion){
+                                              LocalDateTime dateAndTimeOfTechSuggestion,
+                                              long techSuggestedPrice,
+                                              LocalDateTime techSuggestedDate,
+                                              int taskEstimatedDuration){
 }
