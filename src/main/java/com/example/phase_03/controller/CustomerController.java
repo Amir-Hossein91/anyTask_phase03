@@ -1,17 +1,21 @@
 package com.example.phase_03.controller;
 
+import com.example.phase_03.controller.requestObjects.SeeSuggestions;
 import com.example.phase_03.dto.request.CustomerRequestDTO;
 import com.example.phase_03.dto.request.OrderRequestDTO;
 import com.example.phase_03.dto.response.CustomerResponseDTO;
 import com.example.phase_03.dto.response.OrderResponseDTO;
 import com.example.phase_03.dto.response.SubAssistanceResponseDTO;
+import com.example.phase_03.dto.response.TechnicianSuggestionResponseDTO;
 import com.example.phase_03.entity.Customer;
 import com.example.phase_03.entity.Order;
 import com.example.phase_03.entity.SubAssistance;
+import com.example.phase_03.entity.TechnicianSuggestion;
 import com.example.phase_03.entity.enums.OrderStatus;
 import com.example.phase_03.mapper.CustomerMapper;
 import com.example.phase_03.mapper.OrderMapper;
 import com.example.phase_03.mapper.SubAssistanceMapper;
+import com.example.phase_03.mapper.TechnicianSuggestionMapper;
 import com.example.phase_03.service.impl.*;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -79,5 +83,25 @@ public class CustomerController {
                     ,order.getSubAssistance().getAssistance().getTitle(),order.getOrderDescription());
 
         return new ResponseEntity<>(OrderMapper.INSTANCE.modelToDto(order),HttpStatus.CREATED);
+    }
+
+    @PostMapping("/seeSuggestions")
+    public ResponseEntity<List<TechnicianSuggestionResponseDTO>> seeSuggestions (@RequestBody SeeSuggestions request){
+        String username = request.getCustomerUsername();
+        long orderId = request.getOrderId();
+        String orderingBy = request.getOrderingBy();
+
+        List<TechnicianSuggestion> suggestions;
+        switch (orderingBy){
+            case "price" -> suggestions = customerService.seeTechnicianSuggestionsOrderedByPrice(username,orderId);
+            case "score" -> suggestions = customerService.seeTechnicianSuggestionsOrderedByScore(username,orderId);
+            default -> throw new IllegalArgumentException("The 'orderingBy' field can either be 'price' or 'score'");
+        }
+        List<TechnicianSuggestionResponseDTO> responseDTOS = new ArrayList<>();
+
+        for(TechnicianSuggestion t : suggestions)
+            responseDTOS.add(TechnicianSuggestionMapper.INSTANCE.modelToDto(t));
+
+        return new ResponseEntity<>(responseDTOS,HttpStatus.OK);
     }
 }
