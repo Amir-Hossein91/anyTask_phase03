@@ -4,27 +4,24 @@ import com.example.phase_03.controller.jsonClasses.AssignTechnician;
 import com.example.phase_03.dto.request.AssistanceRequestDTO;
 import com.example.phase_03.dto.request.ManagerRequestDTO;
 import com.example.phase_03.dto.request.SubAssistanceRequestDTO;
-import com.example.phase_03.dto.response.AssistanceResponseDTO;
-import com.example.phase_03.dto.response.ManagerResponseDTO;
-import com.example.phase_03.dto.response.SubAssistanceResponseDTO;
-import com.example.phase_03.dto.response.TechnicianResponseDTO;
+import com.example.phase_03.dto.response.*;
 import com.example.phase_03.entity.Assistance;
 import com.example.phase_03.entity.Manager;
 import com.example.phase_03.entity.SubAssistance;
 import com.example.phase_03.entity.Technician;
 import com.example.phase_03.entity.enums.TechnicianStatus;
-import com.example.phase_03.mapper.AssistanceMapper;
-import com.example.phase_03.mapper.ManagerMapper;
-import com.example.phase_03.mapper.SubAssistanceMapper;
-import com.example.phase_03.mapper.TechnicianMapper;
+import com.example.phase_03.mapper.*;
 import com.example.phase_03.service.impl.*;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/manager")
@@ -96,7 +93,6 @@ public class ManagerController {
         String techUsername = request.getTechnicianUsername();
         String subAssistanceTitle = request.getSubAssistanceTitle();
         String assistanceTitle = request.getAssistanceTitle();
-        System.out.println(techUsername + subAssistanceTitle + assistanceTitle);
 
         technicianService.addTechnicianToSubAssistance(techUsername,subAssistanceTitle,assistanceTitle);
 
@@ -109,10 +105,39 @@ public class ManagerController {
         String techUsername = request.getTechnicianUsername();
         String subAssistanceTitle = request.getSubAssistanceTitle();
         String assistanceTitle = request.getAssistanceTitle();
-        System.out.println(techUsername + subAssistanceTitle + assistanceTitle);
 
         technicianService.removeTechnicianFromSubAssistance(techUsername,subAssistanceTitle,assistanceTitle);
 
         return new ResponseEntity<>("Technician resigned successfully", HttpStatus.CREATED);
+    }
+
+    @GetMapping("/getSubAssistances/{username}")
+    @Transactional
+    public ResponseEntity<List<SubAssistanceResponseDTO4Manager>> getSubAssistances (@PathVariable String username){
+        List<SubAssistance> subAssistances = subAssistanceService.showSubAssistances(username);
+
+        Map<SubAssistanceResponseDTO,List<TechnicianResponseDTO>> resultsMap = new HashMap<>();
+        for(SubAssistance s : subAssistances){
+            SubAssistanceResponseDTO key = SubAssistanceMapper.INSTANCE.modelToDto(s);
+            List<TechnicianResponseDTO> value = new ArrayList<>();
+            for(Technician t : s.getTechnicians()){
+                TechnicianResponseDTO responseDTO = TechnicianMapper.INSTANCE.modelToDto(t);
+                value.add(responseDTO);
+            }
+            resultsMap.put(key,value);
+        }
+
+        List<SubAssistanceResponseDTO4Manager> result = new ArrayList<>();
+        for(Map.Entry<SubAssistanceResponseDTO,List<TechnicianResponseDTO>> e : resultsMap.entrySet()){
+            result.add(SubAssistanceResponseDTO4Manager.builder()
+                    .id(e.getKey().id())
+                    .title(e.getKey().title())
+                    .basePrice(e.getKey().basePrice())
+                    .assistanceTitle(e.getKey().assistanceTitle())
+                    .about(e.getKey().about())
+                    .technicians(e.getValue())
+                    .build());
+        }
+        return new ResponseEntity<>(result,HttpStatus.OK);
     }
 }

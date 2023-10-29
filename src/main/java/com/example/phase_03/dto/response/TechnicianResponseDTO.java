@@ -6,7 +6,6 @@ public record TechnicianResponseDTO (long id,
                                      String lastName,
                                      String email,
                                      String username,
-                                     String password,
                                      String technicianStatus,
                                      int numberOfFinishedTasks,
                                      boolean isActive){

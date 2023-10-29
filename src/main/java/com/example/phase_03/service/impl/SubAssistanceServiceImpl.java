@@ -76,33 +76,35 @@ public class SubAssistanceServiceImpl implements SubAssistanceService {
         return saveOrUpdate(subAssistance);
     }
 
-    public List<String> showSubAssistances(String userName) {
+
+    @Transactional
+    public List<SubAssistance> showSubAssistances(String userName) {
         Person person = personService.findByUsername(userName);
         if (person instanceof Manager) {
-            return findAll().stream().map(Object::toString).toList();
+            return findAll();
         } else {
             if (person instanceof Technician && !((Technician) person).isActive())
                 throw new DeactivatedTechnicianException(Constants.DEACTIVATED_TECHNICIAN);
             List<SubAssistance> subAssistanceList = findAll();
-            Map<String, List<String>> result = new HashMap<>();
-            for (SubAssistance s : subAssistanceList) {
-                String assistance = s.getAssistance().getTitle();
-                String subAssistance = s.getTitle() + "--> base price = " + s.getBasePrice()
-                        + ", description = " + s.getAbout();
-                if (result.containsKey(assistance)) {
-                    result.get(assistance).add(subAssistance);
-                } else
-                    result.put(assistance, new ArrayList<>(List.of(subAssistance)));
-            }
-            StringBuilder stringBuilder = new StringBuilder();
-
-            for (Map.Entry<String, List<String>> m : result.entrySet()) {
-                stringBuilder.append(m.getKey()).append(": \n");
-                for (String s : result.get(m.getKey())) {
-                    stringBuilder.append("\t*").append(s).append("\n");
-                }
-            }
-            return List.of(stringBuilder.toString());
+//            Map<String, List<String>> result = new HashMap<>();
+//            for (SubAssistance s : subAssistanceList) {
+//                String assistance = s.getAssistance().getTitle();
+//                String subAssistance = s.getTitle() + "--> base price = " + s.getBasePrice()
+//                        + ", description = " + s.getAbout();
+//                if (result.containsKey(assistance)) {
+//                    result.get(assistance).add(subAssistance);
+//                } else
+//                    result.put(assistance, new ArrayList<>(List.of(subAssistance)));
+//            }
+//            StringBuilder stringBuilder = new StringBuilder();
+//
+//            for (Map.Entry<String, List<String>> m : result.entrySet()) {
+//                stringBuilder.append(m.getKey()).append(": \n");
+//                for (String s : result.get(m.getKey())) {
+//                    stringBuilder.append("\t*").append(s).append("\n");
+//                }
+//            }
+            return subAssistanceList;
         }
     }
 
