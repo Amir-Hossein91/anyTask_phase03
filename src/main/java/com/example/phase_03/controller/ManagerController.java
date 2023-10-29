@@ -1,6 +1,8 @@
 package com.example.phase_03.controller;
 
 import com.example.phase_03.controller.requestObjects.AssignTechnician;
+import com.example.phase_03.controller.requestObjects.ChangeBasePrice;
+import com.example.phase_03.controller.requestObjects.ChangeDescription;
 import com.example.phase_03.dto.request.AssistanceRequestDTO;
 import com.example.phase_03.dto.request.ManagerRequestDTO;
 import com.example.phase_03.dto.request.SubAssistanceRequestDTO;
@@ -139,6 +141,36 @@ public class ManagerController {
                     .build());
         }
         return new ResponseEntity<>(result,HttpStatus.OK);
+    }
+
+    @PostMapping("/changeBasePrice")
+    public ResponseEntity<SubAssistanceResponseDTO> changeBasePrice(@RequestBody ChangeBasePrice request){
+
+        String subAssistanceTitle = request.getSubAssistanceTitle();
+        String assistanceTitle = request.getAssistanceTitle();
+        long basePrice = request.getNewBasePrice();
+
+        subAssistanceService.changeBasePrice(subAssistanceTitle,assistanceTitle,basePrice);
+
+        SubAssistanceResponseDTO responseDTO = SubAssistanceMapper.INSTANCE
+                .modelToDto(subAssistanceService.findSubAssistance(subAssistanceTitle,assistanceService.findAssistance(assistanceTitle)));
+
+        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/changeDescription")
+    public ResponseEntity<SubAssistanceResponseDTO> changeDescription(@RequestBody ChangeDescription request){
+
+        String subAssistanceTitle = request.getSubAssistanceTitle();
+        String assistanceTitle = request.getAssistanceTitle();
+        String description = request.getNewDescription();
+
+        subAssistanceService.changeDescription(subAssistanceTitle,assistanceTitle,description);
+
+        SubAssistanceResponseDTO responseDTO = SubAssistanceMapper.INSTANCE
+                .modelToDto(subAssistanceService.findSubAssistance(subAssistanceTitle,assistanceService.findAssistance(assistanceTitle)));
+
+        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
 
 

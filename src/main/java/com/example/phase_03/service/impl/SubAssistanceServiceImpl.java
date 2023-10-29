@@ -109,10 +109,8 @@ public class SubAssistanceServiceImpl implements SubAssistanceService {
     }
 
     @Transactional
-    public void changeDescription(String managerUsername, String assistanceTitle, String subAssistanceTitle, String newDescription) {
-        Manager manager = managerService.findByUsername(managerUsername);
-        if (manager == null)
-            throw new IllegalArgumentException("Only manager can change description of a sub-assistance");
+    public void changeDescription( String subAssistanceTitle, String assistanceTitle, String newDescription) {
+
         Assistance assistance = assistanceService.findAssistance(assistanceTitle);
         if (assistance == null)
             throw new NotFoundException(Constants.NO_SUCH_ASSISTANCE_CATEGORY);
@@ -124,10 +122,8 @@ public class SubAssistanceServiceImpl implements SubAssistanceService {
     }
 
     @Transactional
-    public void changeBasePrice(String managerUsername, String assistanceTitle, String subAssistanceTitle, long basePrice) {
-        Manager manager = managerService.findByUsername(managerUsername);
-        if (manager == null)
-            throw new IllegalArgumentException("Only manager can change base price of a sub-assistance");
+    public void changeBasePrice( String subAssistanceTitle, String assistanceTitle, long basePrice) {
+
         Assistance assistance = assistanceService.findAssistance(assistanceTitle);
         if (assistance == null)
             throw new NotFoundException(Constants.NO_SUCH_ASSISTANCE_CATEGORY);
