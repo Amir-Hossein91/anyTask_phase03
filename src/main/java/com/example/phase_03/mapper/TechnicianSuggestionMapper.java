@@ -14,11 +14,13 @@ public interface TechnicianSuggestionMapper {
 
     TechnicianSuggestionMapper INSTANCE = Mappers.getMapper(TechnicianSuggestionMapper.class);
 
-    @Mapping(target = "technician.id" , source = "requestDTO.technicianId")
+    @Mapping(target = "technician.username" , source = "requestDTO.technicianUsername")
     @Mapping(target = "order.id" , source = "requestDTO.orderId")
     TechnicianSuggestion dtoToModel (TechnicianSuggestionRequestDTO requestDTO);
 
-    @Mapping(target = "technicianId", source = "technicianSuggestion.technician.id")
+
+    @Mapping(target = "technicianUsername", source = "technicianSuggestion.technician.username")
     @Mapping(target = "orderId", source = "technicianSuggestion.order.id")
+    @Mapping(target = "technicianScore", source = "technicianSuggestion.technician.score")
     TechnicianSuggestionResponseDTO modelToDto (TechnicianSuggestion technicianSuggestion);
 }

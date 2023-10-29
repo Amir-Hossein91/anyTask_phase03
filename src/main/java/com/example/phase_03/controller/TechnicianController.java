@@ -1,21 +1,36 @@
 package com.example.phase_03.controller;
 
 import com.example.phase_03.dto.request.TechnicianRequestDTO;
+import com.example.phase_03.dto.request.TechnicianSuggestionRequestDTO;
+import com.example.phase_03.dto.response.OrderResponseDTO;
+import com.example.phase_03.dto.response.SubAssistanceResponseDTO;
 import com.example.phase_03.dto.response.TechnicianResponseDTO;
+import com.example.phase_03.dto.response.TechnicianSuggestionResponseDTO;
+import com.example.phase_03.entity.Order;
+import com.example.phase_03.entity.SubAssistance;
 import com.example.phase_03.entity.Technician;
+import com.example.phase_03.entity.TechnicianSuggestion;
 import com.example.phase_03.entity.enums.TechnicianStatus;
+import com.example.phase_03.mapper.OrderMapper;
+import com.example.phase_03.mapper.SubAssistanceMapper;
 import com.example.phase_03.mapper.TechnicianMapper;
+import com.example.phase_03.mapper.TechnicianSuggestionMapper;
+import com.example.phase_03.service.impl.OrderServiceImpl;
 import com.example.phase_03.service.impl.PersonServiceImpl;
+import com.example.phase_03.service.impl.SubAssistanceServiceImpl;
 import com.example.phase_03.service.impl.TechnicianServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/technician")
@@ -24,11 +39,17 @@ public class TechnicianController {
 
     private final TechnicianServiceImpl technicianService;
     private final PersonServiceImpl personService;
+    private final OrderServiceImpl orderService;
+    private final SubAssistanceServiceImpl subAssistanceService;
 
     public TechnicianController (TechnicianServiceImpl technicianService,
-                                 PersonServiceImpl personService){
+                                 PersonServiceImpl personService,
+                                 OrderServiceImpl orderService,
+                                 SubAssistanceServiceImpl subAssistanceService){
         this.technicianService = technicianService;
         this.personService = personService;
+        this.orderService = orderService;
+        this.subAssistanceService = subAssistanceService;
     }
 
     @PostMapping(value = "/register")
@@ -45,5 +66,41 @@ public class TechnicianController {
         Files.write(path,image);
 
         return new ResponseEntity<>(TechnicianMapper.INSTANCE.modelToDto(technician), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/relatedOrders/{username}")
+    @Transactional
+    public ResponseEntity<List<OrderResponseDTO>> seeRelatedOrders (@PathVariable String username){
+        List<Order> relatedOrders = technicianService.findRelatedOrders(username);
+        List<OrderResponseDTO> responseDTOS = new ArrayList<>();
+
+        for(Order o : relatedOrders)
+            responseDTOS.add(OrderMapper.INSTANCE.modelToDto(o));
+        return new ResponseEntity<>(responseDTOS,HttpStatus.OK);
+    }
+
+    @PostMapping("/sendSuggestion")
+    @Transactional
+    public ResponseEntity<TechnicianSuggestionResponseDTO> sendTechnicianSuggestion (@RequestBody @Valid
+                                                                                     TechnicianSuggestionRequestDTO requestDTO){
+        TechnicianSuggestion technicianSuggestion = TechnicianSuggestionMapper.INSTANCE.dtoToModel(requestDTO);
+        technicianSuggestion.setTechnician(technicianService.findByUsername(requestDTO.technicianUsername()));
+        technicianSuggestion.setOrder(orderService.findById(requestDTO.orderId()));
+        technicianSuggestion.setDateAndTimeOfTechSuggestion(LocalDateTime.now());
+
+        technicianService.sendTechnicianSuggestion(requestDTO.technicianUsername(), requestDTO.orderId(), technicianSuggestion);
+
+        return new ResponseEntity<>(TechnicianSuggestionMapper.INSTANCE.modelToDto(technicianSuggestion),HttpStatus.CREATED);
+    }
+
+    @GetMapping("/seeSubAssistance/{username}")
+    public ResponseEntity<List<SubAssistanceResponseDTO>> seeSubAssistances(@PathVariable String username){
+        List<SubAssistance> subAssistances = subAssistanceService.showSubAssistancesToOthers(username);
+        List<SubAssistanceResponseDTO> responseDTOS = new ArrayList<>();
+
+        for(SubAssistance s: subAssistances)
+            responseDTOS.add(SubAssistanceMapper.INSTANCE.modelToDto(s));
+
+        return new ResponseEntity<>(responseDTOS,HttpStatus.OK);
     }
 }
