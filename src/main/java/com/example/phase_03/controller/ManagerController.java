@@ -116,7 +116,7 @@ public class ManagerController {
     @GetMapping("/getSubAssistances/{username}")
     @Transactional
     public ResponseEntity<List<SubAssistanceResponseDTO4Manager>> getSubAssistances (@PathVariable String username){
-        List<SubAssistance> subAssistances = subAssistanceService.showSubAssistances(username);
+        List<SubAssistance> subAssistances = subAssistanceService.showSubAssistancesToManager(username);
 
         Map<SubAssistanceResponseDTO,List<TechnicianResponseDTO>> resultsMap = new HashMap<>();
         for(SubAssistance s : subAssistances){
