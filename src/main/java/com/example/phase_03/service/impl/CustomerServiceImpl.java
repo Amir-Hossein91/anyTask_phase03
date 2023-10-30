@@ -182,7 +182,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Transactional
-    public void markOrderAsFinished(String customerUsername, long orderId, long suggestionId) {
+    public void markOrderAsFinished(String customerUsername, long orderId) {
         Customer customer = findByUsername(customerUsername);
         if (customer == null)
             throw new IllegalArgumentException("Only customers have access to this function");
@@ -202,7 +202,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .map(TechnicianSuggestion::getId)
                 .toList();
 
-        TechnicianSuggestion suggestion = technicianSuggestionService.findById(suggestionId);
+        TechnicianSuggestion suggestion = order.getChosenTechnicianSuggestion();
         if (suggestion == null)
             throw new NotFoundException(Constants.TECHNICIAN_SUGGESTION_NOT_EXIST);
 
