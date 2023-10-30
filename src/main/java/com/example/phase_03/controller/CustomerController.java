@@ -1,7 +1,7 @@
 package com.example.phase_03.controller;
 
 import com.example.phase_03.controller.requestObjects.ChooseSuggestion;
-import com.example.phase_03.controller.requestObjects.MarkAsStarted;
+import com.example.phase_03.controller.requestObjects.MarkAsStartedOrFinished;
 import com.example.phase_03.controller.requestObjects.SeeSuggestions;
 import com.example.phase_03.dto.request.CustomerRequestDTO;
 import com.example.phase_03.dto.request.OrderRequestDTO;
@@ -119,10 +119,18 @@ public class CustomerController {
     }
 
     @PostMapping("/markAsStarted")
-    public ResponseEntity<String> markAsStarted (@RequestBody MarkAsStarted request){
+    public ResponseEntity<String> markAsStarted (@RequestBody MarkAsStartedOrFinished request){
 
         customerService.markOrderAsStarted(request.getCustomerUsername(), request.getOrderId());
         Order order = orderService.findById(request.getOrderId());
         return new ResponseEntity<>("Technician started its job at " + order.getStartedTime(),HttpStatus.CREATED);
+    }
+
+    @PostMapping("/markAsFinished")
+    public ResponseEntity<String> markAsFinished (@RequestBody MarkAsStartedOrFinished request){
+
+        customerService.markOrderAsFinished(request.getCustomerUsername(), request.getOrderId());
+        Order order = orderService.findById(request.getOrderId());
+        return new ResponseEntity<>("Technician finished its job at " + order.getFinishedTime(),HttpStatus.CREATED);
     }
 }
