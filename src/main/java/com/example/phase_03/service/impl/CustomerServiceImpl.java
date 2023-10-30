@@ -101,7 +101,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Transactional
-    public void chooseSuggestion(String customerUsername, long orderId, long suggestionId) {
+    public TechnicianSuggestion chooseSuggestion(String customerUsername, long orderId, long suggestionId) {
         Customer customer = findByUsername(customerUsername);
         if (customer == null)
             throw new IllegalArgumentException("Only customers have access to this function");
@@ -130,6 +130,7 @@ public class CustomerServiceImpl implements CustomerService {
         order.setTechnician(suggestion.getTechnician());
         order.setOrderStatus(OrderStatus.TECHNICIAN_IS_ON_THE_WAY);
         orderService.saveOrUpdate(order);
+        return suggestion;
     }
 
     @Transactional

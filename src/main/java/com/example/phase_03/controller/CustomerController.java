@@ -1,5 +1,6 @@
 package com.example.phase_03.controller;
 
+import com.example.phase_03.controller.requestObjects.ChooseSuggestion;
 import com.example.phase_03.controller.requestObjects.SeeSuggestions;
 import com.example.phase_03.dto.request.CustomerRequestDTO;
 import com.example.phase_03.dto.request.OrderRequestDTO;
@@ -103,5 +104,16 @@ public class CustomerController {
             responseDTOS.add(TechnicianSuggestionMapper.INSTANCE.modelToDto(t));
 
         return new ResponseEntity<>(responseDTOS,HttpStatus.OK);
+    }
+
+    @PostMapping("/chooseSuggestion")
+    public ResponseEntity<TechnicianSuggestionResponseDTO> chooseSuggestion(@RequestBody ChooseSuggestion request){
+        String customerUsername = request.getCustomerUsername();
+        long orderId = request.getOrderId();
+        long suggestionId = request.getSuggestionId();
+
+        return new ResponseEntity<>(TechnicianSuggestionMapper.INSTANCE
+                .modelToDto(customerService.chooseSuggestion(customerUsername,orderId,suggestionId)),
+                HttpStatus.CREATED);
     }
 }
