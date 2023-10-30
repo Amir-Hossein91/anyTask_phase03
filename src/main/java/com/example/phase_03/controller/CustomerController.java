@@ -1,6 +1,7 @@
 package com.example.phase_03.controller;
 
 import com.example.phase_03.controller.requestObjects.ChooseSuggestion;
+import com.example.phase_03.controller.requestObjects.MarkAsStarted;
 import com.example.phase_03.controller.requestObjects.SeeSuggestions;
 import com.example.phase_03.dto.request.CustomerRequestDTO;
 import com.example.phase_03.dto.request.OrderRequestDTO;
@@ -115,5 +116,13 @@ public class CustomerController {
         return new ResponseEntity<>(TechnicianSuggestionMapper.INSTANCE
                 .modelToDto(customerService.chooseSuggestion(customerUsername,orderId,suggestionId)),
                 HttpStatus.CREATED);
+    }
+
+    @PostMapping("/markAsStarted")
+    public ResponseEntity<String> markAsStarted (@RequestBody MarkAsStarted request){
+
+        customerService.markOrderAsStarted(request.getCustomerUsername(), request.getOrderId());
+        Order order = orderService.findById(request.getOrderId());
+        return new ResponseEntity<>("Technician started its job at " + order.getStartedTime(),HttpStatus.CREATED);
     }
 }
