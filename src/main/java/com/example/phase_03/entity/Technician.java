@@ -21,7 +21,6 @@ public class Technician extends Person{
     @Range(min = 0, message = "Credit can not be negative")
     private long credit;
     @ManyToMany(mappedBy = "technicians")
-    @Column(name = "sub_Assistances")
     private List<SubAssistance> subAssistances;
     private int score;
     @Enumerated(value = EnumType.STRING)

@@ -40,7 +40,6 @@ public class Order extends BaseEntity {
     private int technicianScore;
     @OneToMany(mappedBy = "order",fetch = FetchType.EAGER)
     @Cascade(value = org.hibernate.annotations.CascadeType.MERGE)
-    @Column(name = "technician_suggestions")
     private List<TechnicianSuggestion> technicianSuggestions;
     @Column(name = "technician_evaluation")
     private String techEvaluation;
