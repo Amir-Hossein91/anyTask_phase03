@@ -44,6 +44,10 @@ public class Order extends BaseEntity {
     private List<TechnicianSuggestion> technicianSuggestions;
     @Column(name = "technician_evaluation")
     private String techEvaluation;
+    @OneToOne
+    private TechnicianSuggestion chosenTechnicianSuggestion;
+    private LocalDateTime startedTime;
+    private LocalDateTime finishedTime;
 
 
     public String toString() {
