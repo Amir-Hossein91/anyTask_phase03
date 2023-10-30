@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -20,16 +21,19 @@ public class CustomerServiceImpl implements CustomerService {
     private final ManagerServiceImpl managerService;
     private final OrderServiceImpl orderService;
     private final TechnicianSuggestionServiceImpl technicianSuggestionService;
+    private final TechnicianServiceImpl technicianService;
 
     public CustomerServiceImpl(CustomerRepository repository,
                                OrderServiceImpl orderService,
                                ManagerServiceImpl managerService,
-                               TechnicianSuggestionServiceImpl technicianSuggestionService) {
+                               TechnicianSuggestionServiceImpl technicianSuggestionService,
+                               TechnicianServiceImpl technicianService) {
         super();
         this.repository = repository;
         this.orderService = orderService;
         this.technicianSuggestionService = technicianSuggestionService;
         this.managerService = managerService;
+        this.technicianService = technicianService;
     }
 
     public List<String> showAllCustomers(String managerUsername) {
@@ -128,13 +132,14 @@ public class CustomerServiceImpl implements CustomerService {
             throw new NotFoundException(Constants.TECHNICIAN_SUGGESTION_NOT_IN_LIST);
 
         order.setTechnician(suggestion.getTechnician());
+        order.setChosenTechnicianSuggestion(suggestion);
         order.setOrderStatus(OrderStatus.TECHNICIAN_IS_ON_THE_WAY);
         orderService.saveOrUpdate(order);
         return suggestion;
     }
 
     @Transactional
-    public void markOrderAsStarted(String customerUsername, long orderId, long suggestionId) {
+    public void markOrderAsStarted(String customerUsername, long orderId) {
         Customer customer = findByUsername(customerUsername);
         if (customer == null)
             throw new IllegalArgumentException("Only customers have access to this function");
@@ -154,20 +159,25 @@ public class CustomerServiceImpl implements CustomerService {
                 .map(TechnicianSuggestion::getId)
                 .toList();
 
-        TechnicianSuggestion suggestion = technicianSuggestionService.findById(suggestionId);
+        TechnicianSuggestion suggestion = order.getChosenTechnicianSuggestion();
         if (suggestion == null)
             throw new NotFoundException(Constants.TECHNICIAN_SUGGESTION_NOT_EXIST);
 
         if (!suggestionsIds.contains(suggestion.getId()))
             throw new NotFoundException(Constants.TECHNICIAN_SUGGESTION_NOT_IN_LIST);
 
-        if (!suggestion.getTechnician().equals(order.getTechnician()))
+        if (!suggestion.equals(order.getChosenTechnicianSuggestion()))
             throw new NotFoundException(Constants.SUGGESTION_IS_NOT_THE_CHOSEN_ONE);
 
-        if (LocalDateTime.now().isBefore(suggestion.getTechSuggestedDate()))
-            throw new IllegalStateException(Constants.ORDER_CANT_START_BEFORE_SUGGESTED_TIME);
+//        if (LocalDateTime.now().isBefore(suggestion.getTechSuggestedDate()))
+//            throw new IllegalStateException(Constants.ORDER_CANT_START_BEFORE_SUGGESTED_TIME);
 
         order.setOrderStatus(OrderStatus.STARTED);
+//        if(LocalDateTime.now().isAfter(suggestion.getTechSuggestedDate()))
+//            order.setStartedTime(LocalDateTime.now());
+//        else
+//            order.setStartedTime(suggestion.getTechSuggestedDate());
+        order.setStartedTime(LocalDateTime.now());
         orderService.saveOrUpdate(order);
     }
 
@@ -203,6 +213,7 @@ public class CustomerServiceImpl implements CustomerService {
             throw new NotFoundException(Constants.SUGGESTION_IS_NOT_THE_CHOSEN_ONE);
 
         order.setOrderStatus(OrderStatus.FINISHED);
+        order.setFinishedTime(LocalDateTime.now());
         orderService.saveOrUpdate(order);
     }
 
@@ -259,6 +270,18 @@ public class CustomerServiceImpl implements CustomerService {
         Technician selectedTechnician = order.getTechnician();
 
         selectedTechnician.setScore(selectedTechnician.getScore() + score);
+
+        TechnicianSuggestion chosenSuggestion = order.getChosenTechnicianSuggestion();
+        LocalDateTime suggestedFinishTime = chosenSuggestion.getTechSuggestedDate().plusHours(chosenSuggestion.getTaskEstimatedDuration());
+        if(order.getFinishedTime().isAfter(suggestedFinishTime)){
+            int negativeScore = (int) suggestedFinishTime.until(order.getFinishedTime(),ChronoUnit.HOURS);
+            selectedTechnician.setScore(selectedTechnician.getScore() - negativeScore);
+            if(selectedTechnician.getScore() < 0){
+                selectedTechnician.setActive(false);
+            }
+        }
+
+        technicianService.saveOrUpdate(selectedTechnician);
         order.setTechnicianScore(score);
         order.setTechEvaluation(opinion);
         orderService.saveOrUpdate(order);
