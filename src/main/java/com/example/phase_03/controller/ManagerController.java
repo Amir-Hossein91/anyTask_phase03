@@ -115,7 +115,7 @@ public class ManagerController {
 
     @GetMapping("/getSubAssistances/{username}")
     @Transactional
-    public ResponseEntity<List<SubAssistanceResponseDTO4Manager>> getSubAssistances (@PathVariable String username){
+    public ResponseEntity<List<SubAssistanceResponseForManagerDTO>> getSubAssistances (@PathVariable String username){
         List<SubAssistance> subAssistances = subAssistanceService.showSubAssistancesToManager(username);
 
         Map<SubAssistanceResponseDTO,List<TechnicianResponseDTO>> resultsMap = new HashMap<>();
@@ -129,9 +129,9 @@ public class ManagerController {
             resultsMap.put(key,value);
         }
 
-        List<SubAssistanceResponseDTO4Manager> result = new ArrayList<>();
+        List<SubAssistanceResponseForManagerDTO> result = new ArrayList<>();
         for(Map.Entry<SubAssistanceResponseDTO,List<TechnicianResponseDTO>> e : resultsMap.entrySet()){
-            result.add(SubAssistanceResponseDTO4Manager.builder()
+            result.add(SubAssistanceResponseForManagerDTO.builder()
                     .id(e.getKey().id())
                     .title(e.getKey().title())
                     .basePrice(e.getKey().basePrice())
