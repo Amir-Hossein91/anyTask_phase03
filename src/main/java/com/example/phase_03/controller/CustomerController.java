@@ -2,9 +2,11 @@ package com.example.phase_03.controller;
 
 import com.example.phase_03.controller.requestObjects.ChooseSuggestion;
 import com.example.phase_03.controller.requestObjects.MarkAsStartedOrFinished;
+import com.example.phase_03.controller.requestObjects.PayThePrice;
 import com.example.phase_03.controller.requestObjects.SeeSuggestions;
 import com.example.phase_03.dto.request.CustomerRequestDTO;
 import com.example.phase_03.dto.request.OrderRequestDTO;
+import com.example.phase_03.dto.request.PaymentRequestDTO;
 import com.example.phase_03.dto.response.CustomerResponseDTO;
 import com.example.phase_03.dto.response.OrderResponseDTO;
 import com.example.phase_03.dto.response.SubAssistanceResponseDTO;
@@ -19,16 +21,21 @@ import com.example.phase_03.mapper.OrderMapper;
 import com.example.phase_03.mapper.SubAssistanceMapper;
 import com.example.phase_03.mapper.TechnicianSuggestionMapper;
 import com.example.phase_03.service.impl.*;
+import com.example.phase_03.utility.Constants;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/customer")
 public class CustomerController {
 
@@ -132,5 +139,29 @@ public class CustomerController {
         customerService.markOrderAsFinished(request.getCustomerUsername(), request.getOrderId());
         Order order = orderService.findById(request.getOrderId());
         return new ResponseEntity<>("Technician finished its job at " + order.getFinishedTime(),HttpStatus.CREATED);
+    }
+
+    @PostMapping("payThePrice")
+    public void payThePrice (@RequestBody PayThePrice request){
+
+        String howToPay = request.getHowToPay();
+        switch(howToPay){
+            case "credit" -> customerService.payThePriceByCredit(request.getCustomerUsername(), request.getOrderId());
+            case "online" -> {
+                File htmlFile = new File("C:\\Users\\AmirHossein\\IdeaProjects\\anyTask\\phase_03\\src\\main\\resources\\static\\PaymentPage.html");
+                try {
+                    Desktop.getDesktop().browse(htmlFile.toURI());
+                } catch (IOException e) {
+                    throw new RuntimeException("File not found");
+                }
+            }
+            default -> throw new IllegalArgumentException("'howToPay' field can only be 'credit' or 'online'");
+        }
+    }
+
+    @PostMapping("/onlinePayment")
+    public ResponseEntity<String> onlinePayment (@RequestBody @Valid PaymentRequestDTO requestDTO){
+        customerService.payThePriceOnline(requestDTO.customerUsername(), requestDTO.orderId());
+        return new ResponseEntity<>("Payment successful",HttpStatus.OK);
     }
 }

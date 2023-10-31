@@ -213,12 +213,14 @@ public class CustomerServiceImpl implements CustomerService {
             throw new NotFoundException(Constants.SUGGESTION_IS_NOT_THE_CHOSEN_ONE);
 
         order.setOrderStatus(OrderStatus.FINISHED);
+        Technician technician = order.getTechnician();
+        technician.setNumberOfFinishedTasks(technician.getNumberOfFinishedTasks() + 1);
         order.setFinishedTime(LocalDateTime.now());
         orderService.saveOrUpdate(order);
     }
 
     @Transactional
-    public void payThePrice(String customerUsername, long orderId) {
+    public void payThePriceByCredit(String customerUsername, long orderId) {
         Customer customer = findByUsername(customerUsername);
         if (customer == null)
             throw new IllegalArgumentException("Paying the price is an act of 'customer'");
@@ -232,23 +234,41 @@ public class CustomerServiceImpl implements CustomerService {
         if (order.getOrderStatus() != OrderStatus.FINISHED)
             throw new IllegalStateException(Constants.PAYING_NOT_POSSIBLE_IN_THIS_STATE);
 
-        TechnicianSuggestion selectSuggestion = new TechnicianSuggestion();
         Technician selectedTechnician = order.getTechnician();
-        for (TechnicianSuggestion t : order.getTechnicianSuggestions()) {
-            Technician test = t.getTechnician();
-            if (test == selectedTechnician) {
-                selectSuggestion = t;
-                break;
-            }
-        }
-        customer.setCredit(customer.getCredit() - selectSuggestion.getTechSuggestedPrice());
-        if (customer.getCredit() < 0)
-            throw new NotEnoughCreditException(Constants.NOT_ENOUGH_CREDIT);
+        TechnicianSuggestion selectSuggestion = order.getChosenTechnicianSuggestion();
 
-        selectedTechnician.setCredit(selectedTechnician.getCredit() + selectSuggestion.getTechSuggestedPrice());
-        selectedTechnician.setNumberOfFinishedTasks(selectedTechnician.getNumberOfFinishedTasks() + 1);
+        if (customer.getCredit() < selectSuggestion.getTechSuggestedPrice())
+            throw new NotEnoughCreditException(Constants.NOT_ENOUGH_CREDIT);
+        customer.setCredit(customer.getCredit() - selectSuggestion.getTechSuggestedPrice());
+
+        selectedTechnician.setCredit(selectedTechnician.getCredit() + (long)(0.7*(selectSuggestion.getTechSuggestedPrice())));
+
         order.setOrderStatus(OrderStatus.FULLY_PAID);
         saveOrUpdate(customer);
+        orderService.saveOrUpdate(order);
+    }
+
+    @Transactional
+    public void payThePriceOnline(String customerUsername, long orderId) {
+        Customer customer = findByUsername(customerUsername);
+        if (customer == null)
+            throw new IllegalArgumentException("Paying the price is an act of 'customer'");
+        Order order = orderService.findById(orderId);
+        if (order == null)
+            throw new NotFoundException(Constants.NO_SUCH_ORDER);
+
+        if (!order.getCustomer().equals(customer))
+            throw new NotFoundException(Constants.ORDER_NOT_BELONG_TO_CUSTOMER);
+
+        if (order.getOrderStatus() != OrderStatus.FINISHED)
+            throw new IllegalStateException(Constants.PAYING_NOT_POSSIBLE_IN_THIS_STATE);
+
+        Technician selectedTechnician = order.getTechnician();
+        TechnicianSuggestion selectSuggestion = order.getChosenTechnicianSuggestion();
+
+        selectedTechnician.setCredit(selectedTechnician.getCredit() + (long)(0.7*(selectSuggestion.getTechSuggestedPrice())));
+
+        order.setOrderStatus(OrderStatus.FULLY_PAID);
         orderService.saveOrUpdate(order);
     }
 
