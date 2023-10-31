@@ -47,6 +47,7 @@ public class Order extends BaseEntity {
     private TechnicianSuggestion chosenTechnicianSuggestion;
     private LocalDateTime startedTime;
     private LocalDateTime finishedTime;
+    private boolean isTechnicianScored;
 
 
     public String toString() {

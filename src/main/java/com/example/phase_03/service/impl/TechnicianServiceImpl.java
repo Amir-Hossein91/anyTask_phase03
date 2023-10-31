@@ -9,8 +9,11 @@ import com.example.phase_03.exceptions.NotFoundException;
 import com.example.phase_03.repository.TechnicianRepository;
 import com.example.phase_03.service.TechnicianService;
 import com.example.phase_03.utility.Constants;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -205,5 +208,26 @@ public class TechnicianServiceImpl implements TechnicianService {
             throw new NotFoundException(Constants.NO_SUCH_ORDER);
 
         orderService.sendTechnicianSuggestion(technician, order, technicianSuggestion);
+    }
+
+    public int seeTechnicianScore (String username, long orderId){
+        Technician technician = findByUsername(username);
+        if (technician == null)
+            throw new IllegalArgumentException("No technician has been registered with this username");
+
+        if (!technician.isActive())
+            throw new DeactivatedTechnicianException(Constants.DEACTIVATED_TECHNICIAN);
+
+        Order order = orderService.findById(orderId);
+        if (order == null)
+            throw new NotFoundException(Constants.NO_SUCH_ORDER);
+
+        if(!order.getTechnician().equals(technician))
+            throw new NotFoundException(Constants.ORDER_IS_NOT_RELATED);
+
+        if(!order.isTechnicianScored())
+            throw new IllegalStateException("Technician has not been scored on this order yet");
+
+        return order.getTechnicianScore();
     }
 }

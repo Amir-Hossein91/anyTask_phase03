@@ -1,5 +1,6 @@
 package com.example.phase_03.controller;
 
+import com.example.phase_03.controller.requestObjects.SeeScore;
 import com.example.phase_03.dto.request.TechnicianRequestDTO;
 import com.example.phase_03.dto.request.TechnicianSuggestionRequestDTO;
 import com.example.phase_03.dto.response.OrderResponseDTO;
@@ -20,6 +21,7 @@ import com.example.phase_03.service.impl.PersonServiceImpl;
 import com.example.phase_03.service.impl.SubAssistanceServiceImpl;
 import com.example.phase_03.service.impl.TechnicianServiceImpl;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +39,7 @@ import java.util.List;
 public class TechnicianController {
     public static int counter = 0;
 
+    @Autowired
     private final TechnicianServiceImpl technicianService;
     private final PersonServiceImpl personService;
     private final OrderServiceImpl orderService;
@@ -102,5 +105,12 @@ public class TechnicianController {
             responseDTOS.add(SubAssistanceMapper.INSTANCE.modelToDto(s));
 
         return new ResponseEntity<>(responseDTOS,HttpStatus.OK);
+    }
+
+    @Transactional
+    @PostMapping("/seeScore")
+    public ResponseEntity<String> seeScore (@RequestBody SeeScore request){
+        int score = technicianService.seeTechnicianScore(request.getTechnicianUsername(), request.getOrderId());
+        return new ResponseEntity<>("Technician score: " + score , HttpStatus.OK);
     }
 }
