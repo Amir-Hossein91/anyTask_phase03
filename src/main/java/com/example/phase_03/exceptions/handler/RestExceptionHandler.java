@@ -95,6 +95,7 @@ public class RestExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> runTimeExceptionHandler(RuntimeException e) {
         log.error(e.getMessage());
+        log.error(e.getClass().getName());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 
