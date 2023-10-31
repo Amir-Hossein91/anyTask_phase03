@@ -241,7 +241,7 @@ public class CustomerServiceImpl implements CustomerService {
             throw new NotEnoughCreditException(Constants.NOT_ENOUGH_CREDIT);
         customer.setCredit(customer.getCredit() - selectSuggestion.getTechSuggestedPrice());
 
-        selectedTechnician.setCredit(selectedTechnician.getCredit() + (long)(0.7*(selectSuggestion.getTechSuggestedPrice())));
+        selectedTechnician.setCredit(selectedTechnician.getCredit() + (long) (0.7 * (selectSuggestion.getTechSuggestedPrice())));
 
         order.setOrderStatus(OrderStatus.FULLY_PAID);
         saveOrUpdate(customer);
@@ -266,7 +266,7 @@ public class CustomerServiceImpl implements CustomerService {
         Technician selectedTechnician = order.getTechnician();
         TechnicianSuggestion selectSuggestion = order.getChosenTechnicianSuggestion();
 
-        selectedTechnician.setCredit(selectedTechnician.getCredit() + (long)(0.7*(selectSuggestion.getTechSuggestedPrice())));
+        selectedTechnician.setCredit(selectedTechnician.getCredit() + (long) (0.7 * (selectSuggestion.getTechSuggestedPrice())));
 
         order.setOrderStatus(OrderStatus.FULLY_PAID);
         orderService.saveOrUpdate(order);
@@ -284,7 +284,7 @@ public class CustomerServiceImpl implements CustomerService {
         if (!order.getCustomer().equals(customer))
             throw new NotFoundException(Constants.ORDER_NOT_BELONG_TO_CUSTOMER);
 
-        if (order.getOrderStatus() != OrderStatus.FINISHED)
+        if (!(order.getOrderStatus() == OrderStatus.FINISHED || order.getOrderStatus() == OrderStatus.FULLY_PAID))
             throw new IllegalStateException(Constants.SCORING_NOT_POSSIBLE_IN_THIS_STATE);
 
         Technician selectedTechnician = order.getTechnician();
@@ -293,10 +293,10 @@ public class CustomerServiceImpl implements CustomerService {
 
         TechnicianSuggestion chosenSuggestion = order.getChosenTechnicianSuggestion();
         LocalDateTime suggestedFinishTime = chosenSuggestion.getTechSuggestedDate().plusHours(chosenSuggestion.getTaskEstimatedDuration());
-        if(order.getFinishedTime().isAfter(suggestedFinishTime)){
-            int negativeScore = (int) suggestedFinishTime.until(order.getFinishedTime(),ChronoUnit.HOURS);
+        if (order.getFinishedTime().isAfter(suggestedFinishTime)) {
+            int negativeScore = (int) suggestedFinishTime.until(order.getFinishedTime(), ChronoUnit.HOURS);
             selectedTechnician.setScore(selectedTechnician.getScore() - negativeScore);
-            if(selectedTechnician.getScore() < 0){
+            if (selectedTechnician.getScore() < 0) {
                 selectedTechnician.setActive(false);
             }
         }

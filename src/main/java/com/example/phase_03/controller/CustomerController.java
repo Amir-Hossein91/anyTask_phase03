@@ -1,9 +1,6 @@
 package com.example.phase_03.controller;
 
-import com.example.phase_03.controller.requestObjects.ChooseSuggestion;
-import com.example.phase_03.controller.requestObjects.MarkAsStartedOrFinished;
-import com.example.phase_03.controller.requestObjects.PayThePrice;
-import com.example.phase_03.controller.requestObjects.SeeSuggestions;
+import com.example.phase_03.controller.requestObjects.*;
 import com.example.phase_03.dto.request.CustomerRequestDTO;
 import com.example.phase_03.dto.request.OrderRequestDTO;
 import com.example.phase_03.dto.request.PaymentRequestDTO;
@@ -163,5 +160,13 @@ public class CustomerController {
     public ResponseEntity<String> onlinePayment (@RequestBody @Valid PaymentRequestDTO requestDTO){
         customerService.payThePriceOnline(requestDTO.customerUsername(), requestDTO.orderId());
         return new ResponseEntity<>("Payment successful",HttpStatus.OK);
+    }
+
+    @PostMapping("/score")
+    public ResponseEntity<String> scoreTechnician (@RequestBody @Valid ScoreTheTechnician request){
+        customerService.scoreTheTechnician(request.getCustomerUsername(), request.getOrderId(),
+                request.getScore(), request.getOpinion());
+
+        return new ResponseEntity<>("Your score and opinion saved successfully",HttpStatus.OK);
     }
 }
