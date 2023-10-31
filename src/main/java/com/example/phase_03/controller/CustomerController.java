@@ -4,10 +4,7 @@ import com.example.phase_03.controller.requestObjects.*;
 import com.example.phase_03.dto.request.CustomerRequestDTO;
 import com.example.phase_03.dto.request.OrderRequestDTO;
 import com.example.phase_03.dto.request.PaymentRequestDTO;
-import com.example.phase_03.dto.response.CustomerResponseDTO;
-import com.example.phase_03.dto.response.OrderResponseDTO;
-import com.example.phase_03.dto.response.SubAssistanceResponseDTO;
-import com.example.phase_03.dto.response.TechnicianSuggestionResponseDTO;
+import com.example.phase_03.dto.response.*;
 import com.example.phase_03.entity.Customer;
 import com.example.phase_03.entity.Order;
 import com.example.phase_03.entity.SubAssistance;
@@ -18,7 +15,7 @@ import com.example.phase_03.mapper.OrderMapper;
 import com.example.phase_03.mapper.SubAssistanceMapper;
 import com.example.phase_03.mapper.TechnicianSuggestionMapper;
 import com.example.phase_03.service.impl.*;
-import com.example.phase_03.utility.Constants;
+import com.wf.captcha.SpecCaptcha;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,12 +27,17 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/customer")
 public class CustomerController {
 
+    private Map<Integer,String> captchaMap = new ConcurrentHashMap<>();
+    private AtomicInteger counter = new AtomicInteger();
 
     private final CustomerServiceImpl customerService;
     private final PersonServiceImpl personService;
@@ -159,8 +161,21 @@ public class CustomerController {
 
     @PostMapping("/onlinePayment")
     public ResponseEntity<String> onlinePayment (@RequestBody @Valid PaymentRequestDTO requestDTO){
+
+        String checkedCaptcha = captchaMap.get(requestDTO.captchaKey());
+        if(!checkedCaptcha.equalsIgnoreCase(requestDTO.captchaValue()))
+            throw new IllegalArgumentException("Wrong captcha value");
+
         customerService.payThePriceOnline(requestDTO.customerUsername(), requestDTO.orderId());
         return new ResponseEntity<>("Payment successful",HttpStatus.OK);
+    }
+
+    @GetMapping("/captcha")
+    public CaptchaResponseDTO getCaptcha(){
+        int captchaKey = counter.incrementAndGet();
+        SpecCaptcha captcha = new SpecCaptcha(130, 48);
+        captchaMap.put(captchaKey,captcha.text());
+        return new CaptchaResponseDTO(captchaKey,captcha.toBase64());
     }
 
     @PostMapping("/score")
