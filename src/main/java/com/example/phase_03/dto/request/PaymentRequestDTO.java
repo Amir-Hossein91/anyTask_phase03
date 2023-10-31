@@ -14,6 +14,5 @@ public record PaymentRequestDTO(@NotNull(message = "Customer username can not be
                                 int cvv2,
                                 @Pattern(regexp = "^[\\d]{5,8}$",message = "Second password must have 5 to 8 digits")
                                 String secondPassword,
-                                int captchaKey,
                                 String captchaValue) {
 }

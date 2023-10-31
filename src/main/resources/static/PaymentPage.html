@@ -49,7 +49,6 @@
         <img alt="captcha" id="captcha-image" onclick="makeCaptcha()">
         <input type="text" class="form-control ms-5 border border-dark" id="captcha-text" aria-label="Username"
                aria-describedby="basic-addon1">
-        <input type="hidden" id="captcha-key">
     </div>
     <div>
         <button class="btn btn-success" onclick="myFunction()" id="send-button">OK</button>
@@ -65,7 +64,6 @@
         let creditCardNumber = $("#card-number").val();
         let cvv2 = $("#cvv2").val();
         let secondPassword = $("#second-password").val();
-        let captchaKey = $("#captcha-key").val();
         let captchaValue = $("#captcha-text").val();
 
         const obj = {
@@ -74,7 +72,6 @@
             creditCardNumber,
             cvv2,
             secondPassword,
-            captchaKey,
             captchaValue
 
         };
@@ -99,13 +96,12 @@
 </script>
 <script>
     makeCaptcha();
+
     function makeCaptcha(){
         let image = document.getElementById('captcha-image');
-        let key = document.getElementById('captcha-key');
         fetch('http://localhost:8080/customer/captcha')
             .then(response => response.json())
             .then(json => {
-                key.setAttribute('value', json.counter)
                 image.setAttribute('src', json.base64)})
 
     }

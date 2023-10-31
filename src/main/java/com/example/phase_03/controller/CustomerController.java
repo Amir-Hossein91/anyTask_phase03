@@ -36,8 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RequestMapping("/customer")
 public class CustomerController {
 
-    private Map<Integer,String> captchaMap = new ConcurrentHashMap<>();
-    private AtomicInteger counter = new AtomicInteger();
+    private String captchaText = "";
 
     private final CustomerServiceImpl customerService;
     private final PersonServiceImpl personService;
@@ -162,21 +161,19 @@ public class CustomerController {
     @PostMapping("/onlinePayment")
     public ResponseEntity<String> onlinePayment (@RequestBody @Valid PaymentRequestDTO requestDTO){
 
-        String checkedCaptcha = captchaMap.get(requestDTO.captchaKey());
+        String checkedCaptcha = captchaText;
         if(!checkedCaptcha.equalsIgnoreCase(requestDTO.captchaValue()))
             throw new IllegalArgumentException("Wrong captcha value");
 
         customerService.payThePriceOnline(requestDTO.customerUsername(), requestDTO.orderId());
-        captchaMap.clear();
         return new ResponseEntity<>("Payment successful",HttpStatus.OK);
     }
 
     @GetMapping("/captcha")
     public CaptchaResponseDTO getCaptcha(){
-        int captchaKey = counter.incrementAndGet();
         SpecCaptcha captcha = new SpecCaptcha(130, 48);
-        captchaMap.put(captchaKey,captcha.text());
-        return new CaptchaResponseDTO(captchaKey,captcha.toBase64());
+        captchaText = captcha.text();
+        return new CaptchaResponseDTO(captcha.toBase64());
     }
 
     @PostMapping("/score")
