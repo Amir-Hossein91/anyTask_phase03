@@ -167,6 +167,7 @@ public class CustomerController {
             throw new IllegalArgumentException("Wrong captcha value");
 
         customerService.payThePriceOnline(requestDTO.customerUsername(), requestDTO.orderId());
+        captchaMap.clear();
         return new ResponseEntity<>("Payment successful",HttpStatus.OK);
     }
 
