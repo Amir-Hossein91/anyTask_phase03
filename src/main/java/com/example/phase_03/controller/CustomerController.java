@@ -80,6 +80,7 @@ public class CustomerController {
 
         Order order = OrderMapper.INSTANCE.dtoToModel(requestDTO);
         order.setTechnicianScore(1);
+        order.setTechnicianScored(false);
         order.setSubAssistance(subAssistanceService.findSubAssistance(requestDTO.subAssistanceTitle(), assistanceService.findAssistance(requestDTO.assistanceTitle())));
         order.setCustomer(customerService.findByUsername(requestDTO.customerUsername()));
         order.setOrderRegistrationDateAndTime(LocalDateTime.now());

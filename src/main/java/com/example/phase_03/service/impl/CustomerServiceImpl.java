@@ -287,6 +287,9 @@ public class CustomerServiceImpl implements CustomerService {
         if (!(order.getOrderStatus() == OrderStatus.FINISHED || order.getOrderStatus() == OrderStatus.FULLY_PAID))
             throw new IllegalStateException(Constants.SCORING_NOT_POSSIBLE_IN_THIS_STATE);
 
+        if(order.isTechnicianScored())
+            throw new IllegalStateException("You have already scored the technician");
+
         Technician selectedTechnician = order.getTechnician();
 
         selectedTechnician.setScore(selectedTechnician.getScore() + score);
@@ -301,9 +304,9 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
 
-        technicianService.saveOrUpdate(selectedTechnician);
         order.setTechnicianScore(score);
         order.setTechEvaluation(opinion);
+        order.setTechnicianScored(true);
         orderService.saveOrUpdate(order);
     }
 
