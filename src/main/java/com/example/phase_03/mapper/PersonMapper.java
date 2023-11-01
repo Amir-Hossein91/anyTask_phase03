@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 public interface PersonMapper {
 
-    PersonMapper INSTANCe = Mappers.getMapper(PersonMapper.class);
+    PersonMapper INSTANCE = Mappers.getMapper(PersonMapper.class);
 
     Person dtoToModel (PersonRequestDTO requestDTO);
 
