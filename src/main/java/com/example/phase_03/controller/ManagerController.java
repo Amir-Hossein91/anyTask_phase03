@@ -171,6 +171,7 @@ public class ManagerController {
     }
 
     @GetMapping("/getDeactivated/{username}")
+    @Transactional
     public ResponseEntity<List<TechnicianResponseDTO>> findDeactivatedTechnicians(@PathVariable String username) {
         List<Technician> deactivatedList = technicianService.seeDeactivatedTechnicians(username);
         List<TechnicianResponseDTO> responseDTOS = new ArrayList<>();
