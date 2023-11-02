@@ -216,6 +216,20 @@ public class CustomerServiceImpl implements CustomerService {
         Technician technician = order.getTechnician();
         technician.setNumberOfFinishedTasks(technician.getNumberOfFinishedTasks() + 1);
         order.setFinishedTime(LocalDateTime.now());
+
+        TechnicianSuggestion chosenSuggestion = order.getChosenTechnicianSuggestion();
+
+//        LocalDateTime suggestedFinishTime = chosenSuggestion.getTechSuggestedDate().plusHours(chosenSuggestion.getTaskEstimatedDuration());
+        LocalDateTime suggestedFinishTime = order.getStartedTime().plusHours(chosenSuggestion.getTaskEstimatedDuration());
+
+        if (order.getFinishedTime().isAfter(suggestedFinishTime)) {
+            int negativeScore = (int) suggestedFinishTime.until(order.getFinishedTime(), ChronoUnit.HOURS);
+            technician.setScore(technician.getScore() - negativeScore);
+            if (technician.getScore() < 0) {
+                technician.setActive(false);
+            }
+        }
+
         orderService.saveOrUpdate(order);
     }
 
@@ -293,16 +307,6 @@ public class CustomerServiceImpl implements CustomerService {
         Technician selectedTechnician = order.getTechnician();
 
         selectedTechnician.setScore(selectedTechnician.getScore() + score);
-
-        TechnicianSuggestion chosenSuggestion = order.getChosenTechnicianSuggestion();
-        LocalDateTime suggestedFinishTime = chosenSuggestion.getTechSuggestedDate().plusHours(chosenSuggestion.getTaskEstimatedDuration());
-        if (order.getFinishedTime().isAfter(suggestedFinishTime)) {
-            int negativeScore = (int) suggestedFinishTime.until(order.getFinishedTime(), ChronoUnit.HOURS);
-            selectedTechnician.setScore(selectedTechnician.getScore() - negativeScore);
-            if (selectedTechnician.getScore() < 0) {
-                selectedTechnician.setActive(false);
-            }
-        }
 
         order.setTechnicianScore(score);
         order.setTechEvaluation(opinion);
