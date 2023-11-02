@@ -18,17 +18,14 @@ import java.util.*;
 public class SubAssistanceServiceImpl implements SubAssistanceService {
 
     private final SubAssistanceRepository repository;
-    private final ManagerServiceImpl managerService;
     private final PersonServiceImpl personService;
     private final AssistanceServiceImpl assistanceService;
 
     public SubAssistanceServiceImpl(SubAssistanceRepository repository,
-                                    ManagerServiceImpl managerService,
                                     @Lazy PersonServiceImpl personService,
                                     AssistanceServiceImpl assistanceService) {
         super();
         this.repository = repository;
-        this.managerService = managerService;
         this.personService = personService;
         this.assistanceService = assistanceService;
     }

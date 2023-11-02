@@ -21,7 +21,6 @@ import com.example.phase_03.service.impl.PersonServiceImpl;
 import com.example.phase_03.service.impl.SubAssistanceServiceImpl;
 import com.example.phase_03.service.impl.TechnicianServiceImpl;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +38,6 @@ import java.util.List;
 public class TechnicianController {
     public static int counter = 0;
 
-    @Autowired
     private final TechnicianServiceImpl technicianService;
     private final PersonServiceImpl personService;
     private final OrderServiceImpl orderService;

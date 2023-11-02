@@ -7,7 +7,6 @@ import com.example.phase_03.service.PersonService;
 import com.example.phase_03.utility.Constants;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import org.springframework.stereotype.Service;
@@ -160,10 +159,6 @@ public class PersonServiceImpl implements PersonService {
         if (!roll.isEmpty()) {
             String r = roll.get();
             if (r.equals("customer")) {
-//                for(Person p : result){
-//                    if(!(p instanceof Customer))
-//                        result.remove(p);
-//                }
                 for (int i = 0; i < result.size(); i++) {
                     Person person = result.get(i);
                     if (!(person instanceof Customer)) {
@@ -172,10 +167,6 @@ public class PersonServiceImpl implements PersonService {
                     }
                 }
             } else if (r.equals("technician")) {
-//                for(Person p : result){
-//                    if(!(p instanceof Technician))
-//                        result.remove(p);
-//                }
                 for (int i = 0; i < result.size(); i++) {
                     Person person = result.get(i);
                     if (!(person instanceof Technician)) {

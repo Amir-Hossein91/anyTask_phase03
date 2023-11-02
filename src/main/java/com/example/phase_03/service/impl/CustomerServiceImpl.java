@@ -21,19 +21,16 @@ public class CustomerServiceImpl implements CustomerService {
     private final ManagerServiceImpl managerService;
     private final OrderServiceImpl orderService;
     private final TechnicianSuggestionServiceImpl technicianSuggestionService;
-    private final TechnicianServiceImpl technicianService;
 
     public CustomerServiceImpl(CustomerRepository repository,
                                OrderServiceImpl orderService,
                                ManagerServiceImpl managerService,
-                               TechnicianSuggestionServiceImpl technicianSuggestionService,
-                               TechnicianServiceImpl technicianService) {
+                               TechnicianSuggestionServiceImpl technicianSuggestionService) {
         super();
         this.repository = repository;
         this.orderService = orderService;
         this.technicianSuggestionService = technicianSuggestionService;
         this.managerService = managerService;
-        this.technicianService = technicianService;
     }
 
     public List<String> showAllCustomers(String managerUsername) {

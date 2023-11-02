@@ -25,18 +25,15 @@ import java.util.*;
 @RequestMapping("/manager")
 public class ManagerController {
 
-    private final ManagerServiceImpl managerService;
     private final PersonServiceImpl personService;
     private final AssistanceServiceImpl assistanceService;
     private final SubAssistanceServiceImpl subAssistanceService;
     private final TechnicianServiceImpl technicianService;
 
-    public ManagerController(ManagerServiceImpl managerService,
-                             PersonServiceImpl personService,
+    public ManagerController(PersonServiceImpl personService,
                              AssistanceServiceImpl assistanceService,
                              SubAssistanceServiceImpl subAssistanceService,
                              TechnicianServiceImpl technicianService) {
-        this.managerService = managerService;
         this.personService = personService;
         this.assistanceService = assistanceService;
         this.subAssistanceService = subAssistanceService;

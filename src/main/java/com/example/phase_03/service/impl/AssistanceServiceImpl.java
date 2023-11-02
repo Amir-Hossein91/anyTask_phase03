@@ -1,7 +1,6 @@
 package com.example.phase_03.service.impl;
 
 import com.example.phase_03.entity.Assistance;
-import com.example.phase_03.entity.Manager;
 import com.example.phase_03.entity.Person;
 import com.example.phase_03.entity.Technician;
 import com.example.phase_03.exceptions.DeactivatedTechnicianException;
@@ -20,15 +19,12 @@ import java.util.List;
 public class AssistanceServiceImpl implements AssistanceService {
     private final AssistanceRepository repository;
 
-    private final ManagerServiceImpl managerService;
     private final PersonServiceImpl personService;
 
     public AssistanceServiceImpl(AssistanceRepository repository,
-                                 ManagerServiceImpl managerService,
                                  @Lazy PersonServiceImpl personService) {
         super();
         this.repository = repository;
-        this.managerService = managerService;
         this.personService = personService;
     }
 

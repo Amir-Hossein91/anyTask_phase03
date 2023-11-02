@@ -93,10 +93,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     public List<Order> findRelatedOrders(Technician technician) {
-        List<Order> fetchedOrders = repository.findRelatedOrders(technician).orElseThrow(
+        return repository.findRelatedOrders(technician).orElseThrow(
                 () -> new NotFoundException(Constants.NO_RELATED_ORDERS)
         );
-        return fetchedOrders;
     }
 
     @Override
