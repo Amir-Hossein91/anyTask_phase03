@@ -4,20 +4,12 @@ import com.example.phase_03.entity.*;
 import com.example.phase_03.entity.enums.TechnicianStatus;
 import com.example.phase_03.exceptions.DeactivatedTechnicianException;
 import com.example.phase_03.exceptions.DuplicateTechnicianException;
-import com.example.phase_03.exceptions.InvalidImageException;
 import com.example.phase_03.exceptions.NotFoundException;
 import com.example.phase_03.repository.TechnicianRepository;
 import com.example.phase_03.service.TechnicianService;
 import com.example.phase_03.utility.Constants;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 @Service
@@ -40,28 +32,6 @@ public class TechnicianServiceImpl implements TechnicianService {
         this.subAssistanceService = subAssistanceService;
         this.assistanceService = assistanceService;
         this.orderService = orderService;
-    }
-
-    public boolean validateImage(Path path) {
-        try {
-            String pathString = path.toString();
-            if (!pathString.endsWith(".jpg"))
-                throw new InvalidImageException(Constants.INVALID_IMAGE_FORMAT);
-            byte[] image = Files.readAllBytes(path);
-            if (image.length > 307200)
-                throw new InvalidImageException(Constants.INVALID_IMAGE_SIZE);
-            return true;
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
-    public void saveImageToDirectory(Path path, byte[] image) {
-        try {
-            Files.write(path, image);
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
-        }
     }
 
     @Transactional
@@ -152,13 +122,6 @@ public class TechnicianServiceImpl implements TechnicianService {
     public List<Technician> saveOrUpdate(List<Technician> technicians) {
         technicians = repository.saveAll(technicians);
         return technicians;
-    }
-
-    public List<Technician> showAllTechnicians(String managerUsername) {
-        Manager manager = managerService.findByUsername(managerUsername);
-        if (manager == null)
-            throw new IllegalArgumentException("Only manager can see the list of all technicians");
-        return findAll();
     }
 
     @Transactional
