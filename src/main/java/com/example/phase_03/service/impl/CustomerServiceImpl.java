@@ -18,33 +18,16 @@ import java.util.List;
 public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository repository;
-    private final ManagerServiceImpl managerService;
     private final OrderServiceImpl orderService;
     private final TechnicianSuggestionServiceImpl technicianSuggestionService;
 
     public CustomerServiceImpl(CustomerRepository repository,
                                OrderServiceImpl orderService,
-                               ManagerServiceImpl managerService,
                                TechnicianSuggestionServiceImpl technicianSuggestionService) {
         super();
         this.repository = repository;
         this.orderService = orderService;
         this.technicianSuggestionService = technicianSuggestionService;
-        this.managerService = managerService;
-    }
-
-    public List<String> showAllCustomers(String managerUsername) {
-        Manager manager = managerService.findByUsername(managerUsername);
-        if (manager == null)
-            throw new IllegalArgumentException("Only manager can see the list of all customers");
-        return findAll().stream().map(Object::toString).toList();
-    }
-
-    public List<String> seeOrdersOf(String customerUsername) {
-        Customer customer = findByUsername(customerUsername);
-        if (customer == null)
-            throw new IllegalArgumentException("this function is only available for 'customers'");
-        return orderService.findByCustomer(customer).stream().map(Object::toString).toList();
     }
 
     private boolean isSuggestionChoosingPossible(Person person, Order order) {

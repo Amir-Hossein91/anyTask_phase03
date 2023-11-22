@@ -7,7 +7,7 @@ import com.example.phase_03.service.PersonService;
 import com.example.phase_03.utility.Constants;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
+import jakarta.persistence.Query;
 import jakarta.persistence.criteria.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,15 +82,15 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Transactional
-    public Customer registerCustomer(Customer person) {
-        return customerService.saveOrUpdate(person);
+    public void registerCustomer(Customer person) {
+        customerService.saveOrUpdate(person);
     }
 
     @Transactional
-    public Technician registerTechnician(Technician technician) {
+    public void registerTechnician(Technician technician) {
         if (technician == null)
-            return null;
-        return technicianService.saveOrUpdate(technician);
+            return;
+        technicianService.saveOrUpdate(technician);
     }
 
     @Transactional
@@ -137,7 +137,7 @@ public class PersonServiceImpl implements PersonService {
             finalPredicates.add(subAssistancePredicate);
         }
 
-        if (!maxMin.isEmpty()) {
+        if (maxMin.isPresent()) {
             String m = maxMin.get();
             if (m.equalsIgnoreCase("max")) {
                 Subquery<Integer> subquery = cq.subquery(Integer.class);
@@ -153,10 +153,10 @@ public class PersonServiceImpl implements PersonService {
         }
 
         cq.select(personRoot).where(finalPredicates.toArray(new Predicate[0]));
-        TypedQuery typedQuery = em.createQuery(cq);
+        Query typedQuery = em.createQuery(cq);
         List<Person> result = typedQuery.getResultList();
 
-        if (!roll.isEmpty()) {
+        if (roll.isPresent()) {
             String r = roll.get();
             if (r.equals("customer")) {
                 for (int i = 0; i < result.size(); i++) {
